@@ -15,7 +15,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule); // Creates the NestJS app from the main module
   await app.listen(process.env.PORT ?? 5000); // Starts the app on the provided port or default to 5000
-  console.log('Database file:', process.env.DB_FILE_NAME); 
+  console.log('Database file:', process.env.DB_FILE_NAME);
 }
 
 bootstrap(); // Calls the bootstrap function to start the app
