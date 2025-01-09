@@ -13,8 +13,9 @@ const db = drizzle(process.env.DB_FILE_NAME!); // Initializes the database conne
 async function bootstrap() {
   // Logs the DB file path to check if it's correct
 
-  const app = await NestFactory.create(AppModule); // Creates the NestJS app from the main module
-  await app.listen(process.env.PORT ?? 5000); // Starts the app on the provided port or default to 5000
+  const app = await NestFactory.create(AppModule); 
+  app.enableCors();
+  await app.listen(process.env.PORT ?? 5000); 
   console.log('Database file:', process.env.DB_FILE_NAME);
 }
 
