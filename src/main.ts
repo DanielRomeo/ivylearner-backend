@@ -6,7 +6,6 @@ import { drizzle } from 'drizzle-orm/libsql';
 
 import 'dotenv/config';
 import { eq } from 'drizzle-orm';
-import { studentsTable } from './database/schema';
 
 const db = drizzle(process.env.DB_FILE_NAME!); // Initializes the database connection using Drizzle ORM
 

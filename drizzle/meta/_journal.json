@@ -1,10 +1,12 @@
 {
+  "version": "7",
+  "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
       "version": "6",
-      "when": 1736337045409,
-      "tag": "0000_violet_franklin_storm",
+      "when": 1736444795791,
+      "tag": "0000_spicy_dazzler",
       "breakpoints": true
     }
   ]

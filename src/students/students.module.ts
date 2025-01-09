@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { StudentsController } from './students.controller';
-import { DatabaseModule } from '../database/database.module'; // Import the DatabaseModule
+import { DatabaseModule } from '../database/database.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  //imports: [DatabaseModule],  // Add DatabaseModule here
-  imports: [DatabaseModule], // Add DatabaseModule here to use its providers
-
+  imports: [DatabaseModule, AuthModule], 
   providers: [StudentsService],
   controllers: [StudentsController],
 })

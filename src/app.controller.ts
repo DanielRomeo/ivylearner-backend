@@ -12,7 +12,6 @@ export class AppController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req): any {
-    // Return a JWT access token after successful login
     return this.authService.login(req.user);
   }
 
@@ -20,7 +19,6 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('protected')
   getProtected(@Request() req): any {
-    // Return the authenticated user's info
     return req.user;
   }
 }

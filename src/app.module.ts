@@ -8,7 +8,7 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    StudentsModule,  // Manages students
+    // StudentsModule,  // Manages students
     DatabaseModule,  // Database setup
     UsersModule,     // Manages users
     AuthModule       // Authentication setup
