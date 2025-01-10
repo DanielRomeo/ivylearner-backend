@@ -10,12 +10,12 @@ import { eq } from 'drizzle-orm';
 const db = drizzle(process.env.DB_FILE_NAME!); // Initializes the database connection using Drizzle ORM
 
 async function bootstrap() {
-  // Logs the DB file path to check if it's correct
+    // Logs the DB file path to check if it's correct
 
-  const app = await NestFactory.create(AppModule); 
-  app.enableCors();
-  await app.listen(process.env.PORT ?? 5000); 
-  console.log('Database file:', process.env.DB_FILE_NAME);
+    const app = await NestFactory.create(AppModule);
+    app.enableCors();
+    await app.listen(process.env.PORT ?? 5000);
+    console.log('Database file:', process.env.DB_FILE_NAME);
 }
 
 bootstrap(); // Calls the bootstrap function to start the app

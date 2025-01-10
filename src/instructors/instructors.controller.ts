@@ -14,33 +14,26 @@ import {
     HttpCode,
 } from '@nestjs/common';
 
+import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { UseGuards } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { AuthService } from 'src/auth/auth.service';
+import { InstructorsService } from './instructors.service';
+import {Instructor} from '../interfaces/instructor.interface' // Instructor type
 
-import { User } from '../interfaces/user.interface';
 
-@Controller('users')
-export class UsersController {
+@Controller('instructor')
+export class InstructorsController {
     constructor(
-        private readonly usersService: UsersService,
-        @Inject(forwardRef(() => AuthService)) // Handle circular dependency
+        private readonly instructorService: InstructorsService,
+        @Inject(forwardRef(() => AuthService)) // for circular dependence
         private readonly authService: AuthService,
     ) {}
 
-    @UseGuards(LocalAuthGuard)
-    @Post('login')
-    login(@Request() req): any {
-        return this.authService.login(req.user);
-    }
-
-    // controller to create user:
     @Post('create')
     @HttpCode(201)
-    async create(@Body() userData: User) {
+    async create(@Body() instructorData: Instructor) {
         try {
-            const newUser = await this.usersService.create(userData);
+            const newUser = await this.instructorService.create(instructorData);
             if (!newUser) {
                 throw new HttpException(
                     'Failed to create user 1111',
@@ -49,7 +42,7 @@ export class UsersController {
             }
 
             // Verify user was created by fetching from DB
-            const createdUser = await this.usersService.findOne(newUser.email);
+            const createdUser = await this.instructorService.findOne(newUser.email);
             if (!createdUser) {
                 throw new HttpException(
                     'User creation verification failed',

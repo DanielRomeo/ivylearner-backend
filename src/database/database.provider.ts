@@ -7,14 +7,14 @@ export const DRIZZLE_DB = 'DRIZZLE_DB';
 
 @Injectable()
 export class DatabaseProvider {
-  private db: any;
+    private db: any;
 
-  constructor(private readonly configService: ConfigService) {
-    const dbFile = this.configService.get<string>('DB_FILE_NAME');
-    this.db = drizzle(dbFile!); // Initialize the DB connection
-  }
+    constructor(private readonly configService: ConfigService) {
+        const dbFile = this.configService.get<string>('DB_FILE_NAME');
+        this.db = drizzle(dbFile!); // Initialize the DB connection
+    }
 
-  getDb() {
-    return this.db; // Return the DB instance
-  }
+    getDb() {
+        return this.db; // Return the DB instance
+    }
 }
