@@ -36,6 +36,15 @@ CREATE TABLE `course_progress` (
 	FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `enrollment` (
+	`student_id` integer NOT NULL,
+	`course_id` integer NOT NULL,
+	`enrollment_date` integer,
+	PRIMARY KEY(`student_id`, `course_id`),
+	FOREIGN KEY (`student_id`) REFERENCES `student`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `instructor` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`user_id` integer NOT NULL,
@@ -47,8 +56,6 @@ CREATE TABLE `instructor` (
 	`years_of_experience` integer,
 	`linkedin_url` text,
 	`rating` integer,
-	`available_for_mentoring` integer,
-	`hourly_rate` integer,
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint

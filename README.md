@@ -3,8 +3,7 @@
 
 ## Description
 
-db stuff
-`npx drizzle-kit push:sqlite`
+[drizzleDB-DOCS](https://orm.drizzle.team/docs/kit-overview)
 
 ## Compile and run the project
 

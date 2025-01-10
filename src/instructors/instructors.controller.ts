@@ -33,44 +33,44 @@ export class InstructorsController {
     @HttpCode(201)
     async create(@Body() instructorData: Instructor) {
         try {
-            const newUser = await this.instructorService.create(instructorData);
-            if (!newUser) {
+            const newInstructor = await this.instructorService.create(instructorData);
+            if (!newInstructor) {
                 throw new HttpException(
-                    'Failed to create user 1111',
+                    'Failed to create instuctor.',
                     HttpStatus.INTERNAL_SERVER_ERROR,
                 );
             }
 
             // Verify user was created by fetching from DB
-            const createdUser = await this.instructorService.findOne(newUser.email);
-            if (!createdUser) {
-                throw new HttpException(
-                    'User creation verification failed',
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                );
-            }
-            const { password, ...userWithoutPassword } = createdUser;
-            return {
-                statusCode: 201,
-                message: 'User created successfully',
-                data: userWithoutPassword,
-            };
+            // const createdUser = await this.instructorService.findOne(newUser.email);
+            // if (!createdUser) {
+            //     throw new HttpException(
+            //         'User creation verification failed',
+            //         HttpStatus.INTERNAL_SERVER_ERROR,
+            //     );
+            // }
+            // const { password, ...userWithoutPassword } = createdUser;
+            // return {
+            //     statusCode: 201,
+            //     message: 'User created successfully',
+            //     data: userWithoutPassword,
+            // };
         } catch (error) {
             // Handle specific errors
-            if (
-                error instanceof Error &&
-                error.message.includes('UNIQUE constraint failed')
-            ) {
-                throw new HttpException(
-                    'Email already exists',
-                    HttpStatus.CONFLICT,
-                );
-            }
+            // if (
+            //     error instanceof Error &&
+            //     error.message.includes('UNIQUE constraint failed')
+            // ) {
+            //     throw new HttpException(
+            //         'Email already exists',
+            //         HttpStatus.CONFLICT,
+            //     );
+            // }
             console.error('User creation error:', error);
-            throw new HttpException(
-                'Failed to create user',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
+            // throw new HttpException(
+            //     'Failed to create user',
+            //     HttpStatus.INTERNAL_SERVER_ERROR,
+            // );
         }
     }
 }

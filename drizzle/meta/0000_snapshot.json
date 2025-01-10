@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "89d6fcad-b048-4ff2-aff2-c21211a19397",
+  "id": "ea1934c5-b089-4b96-a809-b50e246087b4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "course": {
@@ -274,6 +274,72 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "enrollment": {
+      "name": "enrollment",
+      "columns": {
+        "student_id": {
+          "name": "student_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "enrollment_date": {
+          "name": "enrollment_date",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "enrollment_student_id_student_id_fk": {
+          "name": "enrollment_student_id_student_id_fk",
+          "tableFrom": "enrollment",
+          "tableTo": "student",
+          "columnsFrom": [
+            "student_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "enrollment_course_id_course_id_fk": {
+          "name": "enrollment_course_id_course_id_fk",
+          "tableFrom": "enrollment",
+          "tableTo": "course",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "enrollment_student_id_course_id_pk": {
+          "columns": [
+            "student_id",
+            "course_id"
+          ],
+          "name": "enrollment_student_id_course_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "instructor": {
       "name": "instructor",
       "columns": {
@@ -342,20 +408,6 @@
         },
         "rating": {
           "name": "rating",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "available_for_mentoring": {
-          "name": "available_for_mentoring",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "hourly_rate": {
-          "name": "hourly_rate",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
