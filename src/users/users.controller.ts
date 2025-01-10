@@ -25,15 +25,17 @@ export class UsersController {
 
     @UseGuards(LocalAuthGuard)
     @Post('login')
-    login(@Request() req): any {
+    login(@Request() userData: User): any {
         return this.authService.login(req.user);
     }
 
    
     @Post('create')
-    create(@Request() req): any {
+    create(@Body() req): any {
         // return this.authService.create(req.user)
-        return {msg: "creating"}
+        // return {msg: "creating"}
+        let data = this.usersService.create(req.user)
+        return {data: data}
     }
 
 

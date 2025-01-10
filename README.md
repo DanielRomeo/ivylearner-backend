@@ -3,13 +3,8 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ yarn install
-```
+db stuff
+`npx drizzle-kit push:sqlite`
 
 ## Compile and run the project
 
