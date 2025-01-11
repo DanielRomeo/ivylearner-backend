@@ -59,7 +59,7 @@ export const organisation = sqliteTable('organisation', {
     foundedYear: integer('founded_year', { mode: 'number' }),
     createdBy: integer('created_by')
         .notNull()
-        .references(() => user.id),
+        .references(() => instructor.id),
 });
 
 export const course = sqliteTable('course', {

@@ -13,17 +13,20 @@ import {
     HttpStatus,
     HttpCode,
 } from '@nestjs/common';
-import { InstructorsService } from 'src/instructors/instructors.service';
+import { NotFoundException } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import {OrganisationType} from '../interfaces/organisation.interface'
 import { Instructor , InstructorUser } from '../interfaces/instructor.interface';
+import { OrganisationsService } from './organisations.service';
+import { InstructorsService } from 'src/instructors/instructors.service';
 
 
 
 @Controller('organisations')
 export class OrganisationsController {
     constructor(
-        private readonly instructorsService: InstructorsService,
+        private readonly organisationsService: OrganisationsService,
+        private readonly instuctorsService: InstructorsService
     ) {}
 
 
@@ -32,7 +35,18 @@ export class OrganisationsController {
     // @HttpCode(201)
     async create(@Body() organisationData: OrganisationType) {
         try {
-            const newOrganisation = await this.organisationsService.create(organisationData, wait);
+
+            // first lets try to check if the passed organisationData.createcBy Id exists in the users instructors table:
+            const instructorExists = await this.instuctorsService.findOneInstructor(organisationData.createdBy);
+            
+            if (!instructorExists) {
+                throw new HttpException(
+                    'The Instructor Id you are trying to create the organisation for, does not exist in the database!',
+                    HttpStatus.INTERNAL_SERVER_ERROR, // change this status error code in future
+                );
+            }
+
+            const newOrganisation = await this.organisationsService.create(organisationData);
             if (!newOrganisation) {
                 throw new HttpException(
                     'Failed to create Organisation',
@@ -40,7 +54,7 @@ export class OrganisationsController {
                 );
             }
             // Verify organisation was created by fetching from DB
-            const createdOrganisation = await this.organisationService.findOne(newOrganisation.id);
+            const createdOrganisation = await this.organisationsService.findOne(newOrganisation.id);
             if (!createdOrganisation) {
                 throw new HttpException(
                     'Organisation creation verification failed',
@@ -64,9 +78,9 @@ export class OrganisationsController {
                     HttpStatus.CONFLICT,
                 );
             }
-            console.error('User creation error:', error);
+            console.error('Organisation creation error:', error);
             throw new HttpException(
-                'Failed to create user',
+                'Failed to create organisation',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }

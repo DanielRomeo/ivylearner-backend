@@ -10,13 +10,23 @@ import {Instructor, InstructorUser} from '../interfaces/instructor.interface' //
 export class InstructorsService {
     constructor(private readonly databaseProvider: DatabaseProvider) {}
 
-    // find one instructor:
-    async findOne(userId: number): Promise<Instructor | null> {
+    // find one instructor: // only used by the instructor service only
+    protected async findOne(userId: number): Promise<Instructor | null> {
         const db = this.databaseProvider.getDb();
         const [instructorInfo] = await db
             .select()
             .from(instructor)
             .where(eq(instructor.userId, userId));
+        return instructorInfo ?? null;
+    }
+
+    // public, find one instructor:
+    async findOneInstructor(id: number): Promise<Instructor | null> {
+        const db = this.databaseProvider.getDb();
+        const [instructorInfo] = await db
+            .select()
+            .from(instructor)
+            .where(eq(instructor.id, id));
         return instructorInfo ?? null;
     }
 

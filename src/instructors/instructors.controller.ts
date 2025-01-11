@@ -79,7 +79,7 @@ export class InstructorsController {
             }
 
             // Verify user was created by fetching from DB
-            const verifiedCreatedInstructor = await this.instructorService.findOne(instructorDataPure.userId);
+            const verifiedCreatedInstructor = await this.instructorService['findOne'](instructorDataPure.userId);
             if (!verifiedCreatedInstructor) {
                 throw new HttpException(
                     'Instructor creation verification failed',

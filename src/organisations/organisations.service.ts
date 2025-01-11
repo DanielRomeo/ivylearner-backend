@@ -12,7 +12,7 @@ export class OrganisationsService {
     constructor(private readonly databaseProvider: DatabaseProvider) {}
 
     // find one organisation:
-    async findOne(id: number): Promise<OrganisationType> {
+   async findOne(id: number): Promise<OrganisationType> {
         const db = this.databaseProvider.getDb();
         const [organisationInfo] = await db
             .select()
@@ -22,7 +22,7 @@ export class OrganisationsService {
     }
 
     // create an organisation:
-    async create(organisationData: OrganisationType, instructorId: number): Promise<OrganisationType> {
+    async create(organisationData: OrganisationType): Promise<OrganisationType> {
         const db = this.databaseProvider.getDb();
 
         const [newUser] = await db
@@ -31,7 +31,7 @@ export class OrganisationsService {
                 name: organisationData.name,
                 description: organisationData.description,
                 shortDescription: organisationData.shortDescription,
-                createdBy: instructorId // instructor.id
+                createdBy: organisationData.createdBy // instructor.id
             })
             .returning();
 

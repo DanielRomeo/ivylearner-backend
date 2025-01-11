@@ -5,6 +5,16 @@
 
 [drizzleDB-DOCS](https://orm.drizzle.team/docs/kit-overview)
 
+```
+yarn drizzle-kit generate
+yarn drizzle-kit migrate
+yarn drizzle-kit push
+yarn drizzle-kit pull
+yarn drizzle-kit check
+yarn drizzle-kit up
+yarn drizzle-kit studio
+```
+
 ## Compile and run the project
 
 ```bash
