@@ -1,3 +1,5 @@
+import {User} from './user.interface'
+
 export interface Instructor{
     id?: number;
     userId?: number;
@@ -9,4 +11,7 @@ export interface Instructor{
     yearsOfExperience?: number,
     linkedinUrl?: string;
     rating?: number;
+}
+
+export interface InstructorUser extends User, Instructor{
 }
