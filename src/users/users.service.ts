@@ -15,27 +15,6 @@ export type User = {
 export class UsersService {
     constructor(private readonly databaseProvider: DatabaseProvider) {}
 
-    // private readonly users: User[] = [
-    //   {
-    //     id: 1,
-    //     name: 'Marius',
-    //     email: 'marius@gmai.com',
-    //     password: 'sosecure',
-    //   },
-    //   {
-    //     id: 1,
-    //     name: 'Daniel',
-    //     email: 'daniel@gmail.com',
-    //     password: 'password',
-    //   },
-    //   {
-    //     id: 1,
-    //     name: 'Romeo',
-    //     email: 'romeo@gmail.com',
-    //     password: 'password',
-    //   },
-    // ];
-
     // find one user:
     async findOne(email: string): Promise<User | null> {
         const db = this.databaseProvider.getDb();

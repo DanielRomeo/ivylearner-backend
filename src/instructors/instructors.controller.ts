@@ -35,7 +35,6 @@ export class InstructorsController {
     @Post('create')
     @HttpCode(201)
     async create(@Body() instructorDataRecieved: InstructorUser) {
-
         // Extract userData from the instructorData object:
         let {email, password} = instructorDataRecieved;
 
@@ -46,9 +45,8 @@ export class InstructorsController {
             firstName: instructorDataRecieved.firstName,
             lastName: instructorDataRecieved.lastName
         }
-        
-        try {
 
+        try {
             // first create a user:
             const newUser = await this.usersService.create({email, password});
             if (!newUser) {
@@ -91,8 +89,7 @@ export class InstructorsController {
             return {
                 statusCode: 201,
                 message: 'Instructor created successfully',
-               
-                data: verifiedCreatedInstructor
+                data: {...verifiedCreatedInstructor, email: instructorDataPure.email}
             };
             
 
@@ -114,4 +111,14 @@ export class InstructorsController {
             );
         }
     }
+
+    // get an instructor:
+
+    // controller to delete an instructor:
+
+    // controller to update an instructor:
+
+    // constroller to get an instructor:
+
+    
 }
