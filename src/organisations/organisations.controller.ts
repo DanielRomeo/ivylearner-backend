@@ -21,14 +21,12 @@ import { OrganisationsService } from './organisations.service';
 import { InstructorsService } from 'src/instructors/instructors.service';
 
 
-
 @Controller('organisations')
 export class OrganisationsController {
     constructor(
         private readonly organisationsService: OrganisationsService,
         private readonly instuctorsService: InstructorsService
     ) {}
-
 
     // create an organisation:
     @Post('create')
