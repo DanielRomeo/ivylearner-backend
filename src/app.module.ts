@@ -10,6 +10,7 @@ import { InstructorsModule } from './instructors/instructors.module';
 import { OrganisationsService } from './organisations/organisations.service';
 import { OrganisationsModule } from './organisations/organisations.module';
 import { OrganisationsController } from './organisations/organisations.controller';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { OrganisationsController } from './organisations/organisations.controlle
         AuthModule,
         InstructorsModule,
         OrganisationsModule,
+        CoursesModule,
     ],
     controllers: [AppController, OrganisationsController],
     providers: [AppService, InstructorsService, OrganisationsService],
