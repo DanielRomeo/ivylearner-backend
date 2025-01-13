@@ -1,24 +1,24 @@
 
 export interface CourseType{
-    id?: number;
+    id: number;
     title: string;
     shortDescription: string;
-    description: string
-    thumbnail?: string;
-    price: number;
-    duration?: number; // in minutes
-    level?: string; // beginner, int, advanced
-    prerequisites?: string;
-    objectives?: string;
-    tags?: string, // JSON array of strings,,, array???
-    language?: string;
-    certificateAvailable?: boolean;
-    featured?: number;
-    rating?: number;
-    enrollmentCount?: number;
-    publishStatus?: string;
-    publishedAt?: string;
-    lastUpdated?: string;
+    description: string | null;
+    thumbnail: string | null;
+    price: number | null;
+    duration: number | null;
+    level: string | null;
+    prerequisites: string | null;
+    objectives: string | null;
+    tags: string | null;
+    language: string;
+    certificateAvailable: boolean | null;
+    featured: boolean | null;
+    rating: number | null;
+    enrollmentCount: number | null;
+    publishStatus: string | null;
+    publishedAt: Date | null;
+    lastUpdated: Date | null;
     organisationId: number;
-    createdBy: number; // instructor.id
+    createdBy: number;
 }
