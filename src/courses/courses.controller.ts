@@ -1,154 +1,190 @@
 import {
     Controller,
-    Get,
-    Post,
-    Body,
-    Put,
-    Param,
-    Delete,
-    Request,
-    forwardRef,
-    Inject,
-    HttpException,
-    HttpStatus,
-    HttpCode,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpStatus,
+  ParseIntPipe,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
-import { NotFoundException } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import {OrganisationType} from '../interfaces/organisation.interface'
 import { Instructor , InstructorUser } from '../interfaces/instructor.interface';
 import { OrganisationsService } from 'src/organisations/organisations.service';
 import { InstructorsService } from 'src/instructors/instructors.service';
-import { CoursesService } from './courses.service';
+// import { CoursesService } from './courses.service';
 import { CourseType } from 'src/interfaces/courseType.interface';
+
+import {CurrentUser} from '../decorators/current-user.decorators'
+
+import { CoursesService, CreateCourseDto } from './courses.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 
 // Define query parameters interface
 interface CourseQueryParams {
     limit?: number;
     offset?: number;
     publishStatus?: 'draft' | 'published' | 'archived';
-  }
+}
   
-  // Define update DTO
-  interface UpdateCourseDto extends Partial<CreateCourseDto> {
+// Define update DTO
+interface UpdateCourseDto extends Partial<CreateCourseDto> {
     publishStatus?: 'draft' | 'published' | 'archived';
-  }
+}
   
 @Controller('courses')
 @UseGuards(JwtAuthGuard)
-export class CourseController {
-constructor(private readonly courseService: CourseService) {}
+export class CoursesController {
+constructor(private readonly coursesService: CoursesService,
+    private readonly organisationsService : OrganisationsService
+) {}
 
-@Get()
-async findByOrganisation(
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
-    @Query('publishStatus') publishStatus?: 'draft' | 'published' | 'archived',
-    @CurrentUser() user
-) {
-    return this.courseService.findByOrganisation(
-    user.organisationId,
-    { limit, offset, publishStatus }
-    );
-}
 
-@Get(':id')
-async findOne(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user
-) {
-    const course = await this.courseService.findOne(id);
+// @Get()
+// async findByOrganisation(
+//     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+//     @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+//     @Query('publishStatus') publishStatus?: 'draft' | 'published' | 'archived',
+//     @CurrentUser() user
+// ) {
+//     return this.courseService.findByOrganisation(
+//     user.organisationId,
+//     { limit, offset, publishStatus }
+//     );
+// }
+
+// @Get(':id')
+// async findOne(
+//     @Param('id', ParseIntPipe) id: number,
+//     @CurrentUser() user
+// ) {
+//     const course = await this.courseService.findOne(id);
     
-    // Verify organization access
-    if (course.organisationId !== user.organisationId) {
-    throw new NotFoundException('Course not found');
-    }
+//     // Verify organization access
+//     if (course.organisationId !== user.organisationId) {
+//     throw new NotFoundException('Course not found');
+//     }
     
-    return course;
-}
+//     return course;
+// }
 
-@Post()
+@Post('create')
 async create(
     @Body() createCourseDto: CreateCourseDto,
-    @CurrentUser() user
+    @CurrentUser() instructor
 ) {
-    // Ensure the course is created for user's organization
-    if (createCourseDto.organisationId !== user.organisationId) {
-    throw new BadRequestException('Invalid organisation ID');
-    }
+    try {
+        // First verify that the organization exists and was created by this instructor
+        const organization = await this.organisationsService.findOne(createCourseDto.organisationId);
+        
+        if (!organization) {
+            throw new NotFoundException('Organization not found');
+        }
 
-    return this.courseService.create(createCourseDto, user.id);
+        // Check if this instructor created this organization
+        if (organization.createdBy !== instructor.instructorId) {
+            throw new BadRequestException('You can only create courses for organizations you created');
+        }
+
+        // If we get here, the instructor is authorized to create the course
+        return this.coursesService.create({
+            ...createCourseDto,
+            createdBy: instructor.id,
+            publishStatus: 'draft',
+            lastUpdated: new Date(),
+            rating: 0,
+            enrollmentCount: 0
+        });
+
+    } catch (error) {
+        if (error instanceof NotFoundException || error instanceof BadRequestException) {
+            throw error;
+        }
+        
+        throw new InternalServerErrorException('Failed to create course');
+    }
+}
 }
 
-@Put(':id')
-async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateCourseDto: UpdateCourseDto,
-    @CurrentUser() user
-) {
-    const course = await this.courseService.findOne(id);
+
+
+// @Put(':id')
+// async update(
+//     @Param('id', ParseIntPipe) id: number,
+//     @Body() updateCourseDto: UpdateCourseDto,
+//     @CurrentUser() user
+// ) {
+//     const course = await this.courseService.findOne(id);
     
-    // Verify organization access
-    if (course.organisationId !== user.organisationId) {
-    throw new NotFoundException('Course not found');
-    }
+//     // Verify organization access
+//     if (course.organisationId !== user.organisationId) {
+//     throw new NotFoundException('Course not found');
+//     }
 
-    // Prevent changing organisation ID
-    if (updateCourseDto.organisationId && updateCourseDto.organisationId !== course.organisationId) {
-    throw new BadRequestException('Cannot change organisation ID');
-    }
+//     // Prevent changing organisation ID
+//     if (updateCourseDto.organisationId && updateCourseDto.organisationId !== course.organisationId) {
+//     throw new BadRequestException('Cannot change organisation ID');
+//     }
 
-    return this.courseService.update(id, updateCourseDto);
-}
+//     return this.courseService.update(id, updateCourseDto);
+// }
 
-@Delete(':id')
-async remove(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user
-) {
-    const course = await this.courseService.findOne(id);
+// @Delete(':id')
+// async remove(
+//     @Param('id', ParseIntPipe) id: number,
+//     @CurrentUser() user
+// ) {
+//     const course = await this.courseService.findOne(id);
     
-    // Verify organization access
-    if (course.organisationId !== user.organisationId) {
-    throw new NotFoundException('Course not found');
-    }
+//     // Verify organization access
+//     if (course.organisationId !== user.organisationId) {
+//     throw new NotFoundException('Course not found');
+//     }
 
-    await this.courseService.remove(id);
-    return { status: HttpStatus.OK, message: 'Course deleted successfully' };
-}
+//     await this.courseService.remove(id);
+//     return { status: HttpStatus.OK, message: 'Course deleted successfully' };
+// }
 
-@Put(':id/publish')
-async publishCourse(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user
-) {
-    const course = await this.courseService.findOne(id);
+// @Put(':id/publish')
+// async publishCourse(
+//     @Param('id', ParseIntPipe) id: number,
+//     @CurrentUser() user
+// ) {
+//     const course = await this.courseService.findOne(id);
     
-    // Verify organization access
-    if (course.organisationId !== user.organisationId) {
-    throw new NotFoundException('Course not found');
-    }
+//     // Verify organization access
+//     if (course.organisationId !== user.organisationId) {
+//     throw new NotFoundException('Course not found');
+//     }
 
-    return this.courseService.update(id, {
-    publishStatus: 'published',
-    publishedAt: new Date()
-    });
-}
+//     return this.courseService.update(id, {
+//     publishStatus: 'published',
+//     publishedAt: new Date()
+//     });
+// }
 
-@Put(':id/archive')
-async archiveCourse(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user
-) {
-    const course = await this.courseService.findOne(id);
+// @Put(':id/archive')
+// async archiveCourse(
+//     @Param('id', ParseIntPipe) id: number,
+//     @CurrentUser() user
+// ) {
+//     const course = await this.courseService.findOne(id);
     
-    // Verify organization access
-    if (course.organisationId !== user.organisationId) {
-    throw new NotFoundException('Course not found');
-    }
+//     // Verify organization access
+//     if (course.organisationId !== user.organisationId) {
+//     throw new NotFoundException('Course not found');
+//     }
 
-    return this.courseService.update(id, {
-    publishStatus: 'archived'
-    });
-}
-}
+//     return this.courseService.update(id, {
+//     publishStatus: 'archived'
+//     });
+// }
+// }

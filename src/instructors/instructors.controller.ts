@@ -112,6 +112,37 @@ export class InstructorsController {
         }
     }
 
+    // instructurs login:
+    @Post('login')
+    @UseGuards(LocalAuthGuard)
+    async login(@Request() req) {
+        // At this point, req.user contains the authenticated user from LocalStrategy
+        // Get the instructor details using the user ID
+        const instructor = await this.instructorService['findOne'](req.user.id);
+        
+        if (!instructor) {
+            throw new HttpException(
+                'Instructor not found',
+                HttpStatus.NOT_FOUND
+            );
+        }
+
+        // Get access token from auth service
+        const accessToken = await this.authService.login(req.user);
+
+        return {
+            statusCode: 200,
+            message: 'Login successful',
+            data: {
+                accessToken,
+                instructor: {
+                    ...instructor,
+                    email: req.user.email
+                }
+            }
+        };
+    }
+
     // get an instructor:
 
     // controller to delete an instructor:

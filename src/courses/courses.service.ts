@@ -46,32 +46,31 @@ export class CoursesService {
         return courseData;
     }
 
-    async create(dto: CreateCourseDto, userId: number) {
-        // Convert tags array to JSON string if provided
-        const tagsString = dto.tags ? JSON.stringify(dto.tags) : null;
-
-        const newCourse = {
-            ...dto,
-            tags: tagsString,
-            createdBy: userId,
-            publishedAt: dto.publishStatus === 'published' ? new Date() : null,
-            lastUpdated: new Date(),
-            rating: 0,
-            enrollmentCount: 0
-        };
-
+    async create(courseData: CreateCourseDto & {
+        createdBy: number;
+        publishStatus: 'draft';
+        lastUpdated: Date;
+        rating: number;
+        enrollmentCount: number;
+    }) {
+        // Convert tags to JSON string if provided
+        const tagsString = courseData.tags ? JSON.stringify(courseData.tags) : null;
+        
         const db = this.databaseProvider.getDb();
-        const [insertedCourse] = await db
-        .insert(course)
-        .values(newCourse)
-        .returning();
+        const [newCourse] = await db
+            .insert(course)
+            .values({
+                ...courseData,
+                tags: tagsString,
+            })
+            .returning();
 
         return {
-        ...insertedCourse,
-        // Parse tags back to array if they exist
-        tags: insertedCourse.tags ? JSON.parse(insertedCourse.tags) : null
+            ...newCourse,
+            tags: newCourse.tags ? JSON.parse(newCourse.tags) : null
         };
     }
 
   
 }
+//const db = this.databaseProvider.getDb();
