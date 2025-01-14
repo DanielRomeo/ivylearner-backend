@@ -1,4 +1,30 @@
 
+### Users routes:
+#### Create a user
+`http://localhost:5000/users/create`
+```json
+{
+   {
+  "email": "dan@gmail.com",
+  "password": "password",
+  "role": "student"
+}
+}
+```
+
+<!-- Instructors -->
+### Instructor:
+#### Create Instructor:
+`http://localhost:5000/instructors/create`
+```json
+  {
+    "email": "danielromeo99@gmail.com",
+    "password": "password"
+}
+```
+
+
+<!-- Courses -->
 ### Courses routes
 #### Create a course:
 `http://localhost:5000/courses/create`
@@ -13,8 +39,8 @@
 }
 ```
 
-### Instructors routes:
-#### Create instructor:
+### Organisation routes:
+#### Create organisation:
 `http://localhost:5000/organisations/create`
 ```json
 {
@@ -25,14 +51,3 @@
 }
 ```
 
-### Users routes:
-#### Create a user
-`http://localhost:5000/users/create`
-```json
-{
-   "name": "Spetznaz",
-    "description": "Spetznaz school of 3000",
-    "shortDescription": "This is spetznaz school of 3000",
-  "createdBy": 5
-}
-```

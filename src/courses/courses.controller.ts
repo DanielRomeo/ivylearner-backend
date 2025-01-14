@@ -92,16 +92,12 @@ async create(
         }
 
         // get the instructorId, given the instructorUser_id
+        // here, since we have some playing around with the user id and the isntructor id, we just convert the instructorUser Id, and get the instructor Id, coz thats whats required to make comparisons
         const  instructorInformation = await this.instructorsService.getInstructorIdGivenInstructorUser_id(instructor.id);
         if(instructorInformation){
             console.log(instructorInformation)
 
         }
-
-        // Check if this instructor created this organization
-        // console.log(organization)
-        // console.log(instructor)
-        // supposed to be instructor.id or userId.
 
         if (organization.createdBy !== instructorInformation.id) {
             throw new BadRequestException('You can only create courses for organizations you created');
