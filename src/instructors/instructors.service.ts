@@ -30,6 +30,15 @@ export class InstructorsService {
         return instructorInfo ?? null;
     }
 
+    async getInstructorIdGivenInstructorUser_id(user_id: number): Promise<Instructor | null>{
+        const db = this.databaseProvider.getDb();
+        const [instructorInfo] = await db
+            .select()
+            .from(instructor)
+            .where(eq(instructor.userId, user_id));
+        return instructorInfo ?? null;
+    }
+
     // create an instructor:
     async create(instructorData: InstructorUser): Promise<InstructorUser> {
         const db = this.databaseProvider.getDb();

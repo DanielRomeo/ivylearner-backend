@@ -44,7 +44,8 @@ interface UpdateCourseDto extends Partial<CreateCourseDto> {
 @UseGuards(JwtAuthGuard)
 export class CoursesController {
 constructor(private readonly coursesService: CoursesService,
-    private readonly organisationsService : OrganisationsService
+    private readonly organisationsService : OrganisationsService,
+    private readonly instructorsService : InstructorsService
 ) {}
 
 
@@ -89,8 +90,19 @@ async create(
             throw new NotFoundException('Organization not found');
         }
 
+        // get the instructorId, given the instructorUser_id
+        const  instructorInformation = await this.instructorsService.getInstructorIdGivenInstructorUser_id(instructor.id);
+        if(instructorInformation){
+            console.log(instructorInformation)
+
+        }
+
         // Check if this instructor created this organization
-        if (organization.createdBy !== instructor.instructorId) {
+        // console.log(organization)
+        // console.log(instructor)
+        // supposed to be instructor.id or userId.
+
+        if (organization.createdBy !== instructorInformation.id) {
             throw new BadRequestException('You can only create courses for organizations you created');
         }
 

@@ -74,7 +74,7 @@ export const course = sqliteTable('course', {
     prerequisites: text('prerequisites'),
     objectives: text('objectives'),
     tags: text('tags'), // JSON array of strings
-    language: text('language').notNull(),
+    language: text('language'),
     certificateAvailable: integer('certificate_available', { mode: 'boolean' }),
     featured: integer('featured', { mode: 'boolean' }),
     rating: integer('rating', { mode: 'number' }),
