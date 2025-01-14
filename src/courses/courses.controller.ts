@@ -13,6 +13,7 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import {OrganisationType} from '../interfaces/organisation.interface'
@@ -107,7 +108,7 @@ async create(
         }
 
         // If we get here, the instructor is authorized to create the course
-        return this.coursesService.create({
+        const courseCreated = await this.coursesService.create({
             ...createCourseDto,
             createdBy: instructor.id,
             publishStatus: 'draft',
@@ -115,6 +116,18 @@ async create(
             rating: 0,
             enrollmentCount: 0
         });
+        if (!courseCreated) {
+            throw new HttpException(
+                'Failed to create course.',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
+        return {
+            statusCode: 201,
+            message: 'Instructor created successfully',
+            data: courseCreated
+        };
 
     } catch (error) {
         if (error instanceof NotFoundException || error instanceof BadRequestException) {
