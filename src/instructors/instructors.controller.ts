@@ -12,6 +12,8 @@ import {
     HttpException,
     HttpStatus,
     HttpCode,
+    ParseIntPipe,
+    NotFoundException
 } from '@nestjs/common';
 
 import { AuthService } from 'src/auth/auth.service';
@@ -144,6 +146,23 @@ export class InstructorsController {
     }
 
     // get an instructor:
+    @Get(':userId')
+    async findOne(
+        @Param('userId', ParseIntPipe) userId: number
+    ) {
+        const instructor = await this.instructorService['findOne'](userId);
+        if(!instructor){
+            throw new NotFoundException('Instructor not found');
+
+        }
+        // Verify organization access
+        // if (course.organisationId !== user.organisationId) {
+        // throw new NotFoundException('Course not found');
+        // }
+        console.log(instructor)
+        
+        return instructor;
+    }
 
     // controller to delete an instructor:
 
