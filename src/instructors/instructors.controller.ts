@@ -35,7 +35,7 @@ export class InstructorsController {
     ) {}
 
     @Post('create')
-    @HttpCode(201)
+    // @HttpCode(201)
     async create(@Body() instructorDataRecieved: InstructorUser) {
         // Extract userData from the instructorData object:
         let {email, password} = instructorDataRecieved;
@@ -116,6 +116,7 @@ export class InstructorsController {
 
     // instructurs login:
     @Post('login')
+    @HttpCode(200)
     @UseGuards(LocalAuthGuard)
     async login(@Request() req) {
         // At this point, req.user contains the authenticated user from LocalStrategy
@@ -155,13 +156,11 @@ export class InstructorsController {
             throw new NotFoundException('Instructor not found');
 
         }
-        // Verify organization access
-        // if (course.organisationId !== user.organisationId) {
-        // throw new NotFoundException('Course not found');
-        // }
-        console.log(instructor)
-        
-        return instructor;
+       
+        return {
+            statusCode: 200,
+            data:instructor
+        };
     }
 
     // controller to delete an instructor:

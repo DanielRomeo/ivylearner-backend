@@ -21,4 +21,10 @@ export class AppController {
     getProtected(@Request() req): any {
         return req.user;
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('auth/me')
+    authenticateUser(@Request() req): any {
+        return req.user;
+    }
 }
