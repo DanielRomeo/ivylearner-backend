@@ -39,6 +39,8 @@
 }
 ```
 
+
+<!-- Organisations -->
 ### Organisation routes:
 #### Create organisation:
 `http://localhost:5000/organisations/create`
