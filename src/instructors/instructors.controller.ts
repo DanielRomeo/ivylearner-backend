@@ -23,6 +23,7 @@ import { InstructorsService } from './instructors.service';
 import {Instructor, InstructorUser} from '../interfaces/instructor.interface' // Instructor type
 import {User} from '../interfaces/user.interface'
 import { UsersService } from 'src/users/users.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 
 @Controller('instructors')
@@ -130,14 +131,13 @@ export class InstructorsController {
             );
         }
 
-        // Get access token from auth service
+        // Get access token from auth service:
         const accessToken = await this.authService.login(req.user);
-
         return {
             statusCode: 200,
             message: 'Login successful',
             data: {
-                accessToken,
+                access_token: accessToken['access_token'],
                 instructor: {
                     ...instructor,
                     email: req.user.email
@@ -161,6 +161,13 @@ export class InstructorsController {
             statusCode: 200,
             data:instructor
         };
+    }
+
+    // me
+    @UseGuards(JwtAuthGuard)
+    @Get('me')
+    authenticateUser(@Request() req): any {
+        return req.user;
     }
 
     // controller to delete an instructor:

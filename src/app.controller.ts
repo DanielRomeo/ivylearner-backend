@@ -9,11 +9,11 @@ export class AppController {
     constructor(private readonly authService: AuthService) {}
 
     // Login route using LocalAuthGuard (for username/password authentication)
-    @UseGuards(LocalAuthGuard)
-    @Post('login')
-    login(@Request() req): any {
-        return this.authService.login(req.user);
-    }
+    // @UseGuards(LocalAuthGuard)
+    // @Post('login')
+    // login(@Request() req): any {
+    //     return this.authService.login(req.user);
+    // }
 
     // Protected route using JwtAuthGuard
     @UseGuards(JwtAuthGuard)

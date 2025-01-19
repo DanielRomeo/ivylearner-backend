@@ -31,8 +31,19 @@ export class UsersController {
 
     @UseGuards(LocalAuthGuard)
     @Post('login')
-    login(@Request() req): any {
-        return this.authService.login(req.user);
+    async login(@Request() req) {
+        console.log(req.user)
+        const accessToken = await this.authService.login(req.user);
+        return {
+            statusCode: 200,
+            message: 'Login successful',
+            data: {
+                access_token: accessToken['access_token'],
+                user: {
+                    id: req.user.id
+                }
+            }
+        };
     }
 
     // controller to create user:

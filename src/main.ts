@@ -14,6 +14,7 @@ async function bootstrap() {
 
     const app = await NestFactory.create(AppModule);
     app.enableCors();
+    app.setGlobalPrefix('api'); 
     await app.listen(process.env.PORT ?? 5000);
     console.log('Database file:', process.env.DB_FILE_NAME);
 }
