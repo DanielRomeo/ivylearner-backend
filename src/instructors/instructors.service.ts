@@ -39,6 +39,16 @@ export class InstructorsService {
         return instructorInfo ?? null;
     }
 
+     // find if main Id exists in student table:
+     async findCriminalInstructor(id: number): Promise<Instructor | null> {
+        const db = this.databaseProvider.getDb();
+        const [instructorInfo] = await db
+            .select()
+            .from(instructor)
+            .where(eq(instructor.userId, id));
+        return instructorInfo ?? null;
+    }
+
     // create an instructor:
     async create(instructorData: InstructorUser): Promise<InstructorUser> {
         const db = this.databaseProvider.getDb();

@@ -57,22 +57,32 @@ export class StudentsService {
         return studentInfo ?? null;
     }
 
-     // create a student:
-     async create(studentData: StudentUser): Promise<StudentUser> {
+    // find if main Id exists in student table:
+    async findCriminalStudent(id: number): Promise<Student | null> {
         const db = this.databaseProvider.getDb();
+        const [studentInfo] = await db
+            .select()
+            .from(student)
+            .where(eq(student.userId, id));
+        return studentInfo ?? null;
+    }
 
-        const [newStudent] = await db
-            .insert(student)
-            .values({
-                userId : studentData.userId,
-                email: studentData.email,
-                password: studentData.password,
-                firstName: studentData.firstName,
-                lastName: studentData.lastName
-            })
-            .returning();
+    // create a student:
+    async create(studentData: StudentUser): Promise<StudentUser> {
+    const db = this.databaseProvider.getDb();
 
-        return newStudent;
+    const [newStudent] = await db
+        .insert(student)
+        .values({
+            userId : studentData.userId,
+            email: studentData.email,
+            password: studentData.password,
+            firstName: studentData.firstName,
+            lastName: studentData.lastName
+        })
+        .returning();
+
+    return newStudent;
     }
 
     async getAllStudents() {

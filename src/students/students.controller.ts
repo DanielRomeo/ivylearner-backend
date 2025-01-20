@@ -52,7 +52,6 @@ export class StudentsController {
             firstName: studentDataReceived.firstName,
             lastName: studentDataReceived.lastName
         }
-        console.log('creae student is called')
         try {
             // first create a user:
             const newUser = await this.usersService.create({email, password});

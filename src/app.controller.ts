@@ -35,12 +35,11 @@ export class AppController {
     }
 
     @Get('getUserDetails/:id')
-    @Get(':id')
     async getDetails(
         @Param('id', ParseIntPipe) userId: number
     ) {
         // first find if the user is in the instructors table:
-        const userType = await this.instructorsService['findOneInstructor'](userId);
+        const userType = await this.instructorsService['findCriminalInstructor'](userId);
         console.log(userType)
         if(userType){
             return {
@@ -49,7 +48,8 @@ export class AppController {
             };
         }else{
            // try finding it in the students table:
-           const userType = await this.studentsService['findOneStudent'](userId);
+           const userType = await this.studentsService['findCriminalStudent'](userId);
+           console.log(userType)
            if(userType){
             return {
                 ...userType,
