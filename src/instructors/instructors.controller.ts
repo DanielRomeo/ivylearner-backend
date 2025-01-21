@@ -147,6 +147,7 @@ export class InstructorsController {
     }
 
     // get an instructor:
+    @UseGuards(JwtAuthGuard)
     @Get(':userId')
     async findOne(
         @Param('userId', ParseIntPipe) userId: number
