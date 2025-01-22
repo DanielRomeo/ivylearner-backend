@@ -12,6 +12,8 @@ import { OrganisationsModule } from './organisations/organisations.module';
 import { OrganisationsController } from './organisations/organisations.controller';
 import { CoursesModule } from './courses/courses.module';
 import { StudentsService } from './students/students.service';
+import { LessonsService } from './lessons/lessons.service';
+import { LessonsModule } from './lessons/lessons.module';
 
 @Module({
     imports: [
@@ -22,8 +24,9 @@ import { StudentsService } from './students/students.service';
         InstructorsModule,
         OrganisationsModule,
         CoursesModule,
+        LessonsModule,
     ],
     controllers: [AppController, OrganisationsController],
-    providers: [AppService, InstructorsService, OrganisationsService, StudentsService],
+    providers: [AppService, InstructorsService, OrganisationsService, StudentsService, LessonsService],
 })
 export class AppModule {}
