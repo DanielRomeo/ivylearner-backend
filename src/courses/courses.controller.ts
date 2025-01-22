@@ -42,7 +42,7 @@ interface UpdateCourseDto extends Partial<CreateCourseDto> {
 }
   
 @Controller('courses')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class CoursesController {
 constructor(private readonly coursesService: CoursesService,
     private readonly organisationsService : OrganisationsService,
@@ -63,24 +63,25 @@ constructor(private readonly coursesService: CoursesService,
 //     );
 // }
 
-// @Get(':id')
-// async findOne(
-//     @Param('id', ParseIntPipe) id: number,
-//     @CurrentUser() user
-// ) {
-//     const course = await this.courseService.findOne(id);
+@Get(':id')
+async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user
+) {
+    const course = await this.coursesService.findOne(id);
     
-//     // Verify organization access
-//     if (course.organisationId !== user.organisationId) {
-//     throw new NotFoundException('Course not found');
-//     }
+    // Verify organization access
+    if (course.organisationId !== user.organisationId) {
+    throw new NotFoundException('Course not found');
+    }
     
-//     return course;
-// }
+    return course;
+}
 
 
 
 @Post('create')
+@UseGuards(JwtAuthGuard)
 async create(
     @Body() createCourseDto: CreateCourseDto,
     @CurrentUser() instructor
@@ -123,7 +124,7 @@ async create(
 
         return {
             statusCode: 201,
-            message: 'Instructor created successfully',
+            message: 'Course created successfully',
             data: courseCreated
         };
 
