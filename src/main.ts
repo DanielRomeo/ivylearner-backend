@@ -17,6 +17,8 @@ async function bootstrap() {
     app.setGlobalPrefix('api'); 
     await app.listen(process.env.PORT ?? 5000);
     console.log('Database file:', process.env.DB_FILE_NAME);
+    console.log('Database Path:', process.env.DATABASE_PATH);
+
 }
 
 bootstrap(); // Calls the bootstrap function to start the app

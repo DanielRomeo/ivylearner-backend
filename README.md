@@ -15,6 +15,13 @@ yarn drizzle-kit up
 yarn drizzle-kit studio
 ```
 
+```
+Linux:
+DATABASE_PATH=file:./local.db
+
+Windows: 
+```
+
 ## Compile and run the project
 
 ```bash

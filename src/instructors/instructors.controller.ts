@@ -38,8 +38,15 @@ export class InstructorsController {
     @Post('create')
     // @HttpCode(201)
     async create(@Body() instructorDataRecieved: InstructorUser) {
-        // Extract userData from the instructorData object:
-        let {email, password} = instructorDataRecieved;
+
+        // Check if all required fields are provided
+        const { email, password, firstName, lastName } = instructorDataRecieved;
+        if (!email || !password || !firstName || !lastName) {
+            throw new HttpException(
+                'Missing required fields',
+                HttpStatus.BAD_REQUEST
+            );
+        }
 
         let instructorDataPure: InstructorUser = {
             userId: null,
