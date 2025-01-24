@@ -36,13 +36,16 @@ export class OrganisationsController {
 
             // first lets try to check if the passed organisationData.createcBy Id exists in the users instructors table:
             const instructorExists = await this.instuctorsService.findOneInstructor(organisationData.createdBy);
-            
+            console.log(organisationData.createdBy)
             if (!instructorExists) {
                 throw new HttpException(
                     'The Instructor Id you are trying to create the organisation for, does not exist in the database!',
                     HttpStatus.INTERNAL_SERVER_ERROR, // change this status error code in future
                 );
             }
+
+            // change the 'createdBy' property. because the organisationService want the instructorId not instructor UserId
+            organisationData['createdBy'] = await this.instuctorsService.getInstructorIdGivenInstructorUser_id(organisationData.createdBy);
 
             const newOrganisation = await this.organisationsService.create(organisationData);
             if (!newOrganisation) {

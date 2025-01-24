@@ -40,7 +40,7 @@ export class AppController {
     ) {
         // first find if the user is in the instructors table:
         const userType = await this.instructorsService['findCriminalInstructor'](userId);
-        console.log(userType)
+        // console.log(userType)
         if(userType){
             return {
                 ...userType,
@@ -49,7 +49,7 @@ export class AppController {
         }else{
            // try finding it in the students table:
            const userType = await this.studentsService['findCriminalStudent'](userId);
-           console.log(userType)
+        //    console.log(userType)
            if(userType){
             return {
                 ...userType,

@@ -26,17 +26,17 @@ export class InstructorsService {
         const [instructorInfo] = await db
             .select()
             .from(instructor)
-            .where(eq(instructor.id, id));
+            .where(eq(instructor.userId, id));
         return instructorInfo ?? null;
     }
 
-    async getInstructorIdGivenInstructorUser_id(user_id: number): Promise<Instructor | null>{
+    async getInstructorIdGivenInstructorUser_id(user_id: number): Promise<number | null>{
         const db = this.databaseProvider.getDb();
         const [instructorInfo] = await db
             .select()
             .from(instructor)
             .where(eq(instructor.userId, user_id));
-        return instructorInfo ?? null;
+        return instructorInfo.id ?? null;
     }
 
      // find if main Id exists in student table:
