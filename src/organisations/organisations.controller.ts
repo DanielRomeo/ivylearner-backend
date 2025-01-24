@@ -86,4 +86,11 @@ export class OrganisationsController {
             );
         }
     }
+
+    // get the first organisation that is created by the instructor id
+    @Get('first/:instructorId')
+    async getFirstByInstructor(@Param('instructorId') instructorId: string) {
+        const organization = await this.organisationsService.findFirstByInstructor(Number(instructorId));
+        return organization || { message: 'No organizations found for this instructor' };
+    }
 }

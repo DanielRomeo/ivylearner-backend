@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy, RefreshTokenStrategy } from './jwt.strategy';
 
 @Module({
     imports: [
@@ -13,10 +13,14 @@ import { JwtStrategy } from './jwt.strategy';
         PassportModule,
         JwtModule.register({
             secret: 'SECRET',
-            signOptions: { expiresIn: '60s' },
+            signOptions: { expiresIn: '15m' },
         }),
+        JwtModule.register({
+            secret: 'REFRESH_TOKEN_SECRET',
+            signOptions: { expiresIn: '7d' }, // Long-lived refresh token
+          }),
     ],
-    providers: [AuthService, JwtStrategy, LocalStrategy],
+    providers: [AuthService, JwtStrategy, RefreshTokenStrategy , LocalStrategy],
     exports: [AuthService],
 })
 export class AuthModule {}
