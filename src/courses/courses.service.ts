@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseProvider } from 'src/database/database.provider';
 import { course } from '../database/schema';
-import { eq } from 'drizzle-orm';
+import { eq , sql} from 'drizzle-orm';
 import { CourseType } from 'src/interfaces/courseType.interface';
 
 
@@ -24,6 +24,12 @@ export interface CreateCourseDto {
     publishStatus?: 'draft' | 'published' | 'archived';
     organisationId: number
 
+}
+
+interface CourseQueryParams {
+    limit?: number;
+    offset?: number;
+    publishStatus?: 'draft' | 'published' | 'archived';
 }
 
 @Injectable()
@@ -72,6 +78,21 @@ export class CoursesService {
         };
     }
 
+    // find the courses owned by an instructor:
+    // Find courses by instructor ID:
+    async findCoursesByInstructorId(instructorId: number) {
+        const db = this.databaseProvider.getDb();
+
+        const results = await db
+            .select()
+            .from(course)
+            .where(eq(course.createdBy, instructorId));
+
+        return results.map(courseData => ({
+            ...courseData,
+            tags: courseData.tags ? JSON.parse(courseData.tags) : null, // Parse tags back to array
+        }));
+    }
+
   
 }
-//const db = this.databaseProvider.getDb();
