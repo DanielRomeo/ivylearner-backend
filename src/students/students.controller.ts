@@ -13,7 +13,7 @@ import {
     HttpStatus,
     HttpCode,
     ParseIntPipe,
-    NotFoundException
+    NotFoundException,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { StudentUser } from 'src/interfaces/student.interface';
@@ -22,7 +22,8 @@ import { AuthService } from 'src/auth/auth.service';
 
 @Controller('students')
 export class StudentsController {
-    constructor(private readonly studentsService: StudentsService,
+    constructor(
+        private readonly studentsService: StudentsService,
         private readonly usersService: UsersService,
         @Inject(forwardRef(() => AuthService)) // for circular dependence
         private readonly authService: AuthService,
@@ -43,18 +44,18 @@ export class StudentsController {
     @Post('create')
     // @HttpCode(201)
     async create(@Body() studentDataReceived: StudentUser) {
-        let {email, password} = studentDataReceived;
+        let { email, password } = studentDataReceived;
 
         let studentDataPure: StudentUser = {
             userId: null,
             email: null,
             password: null,
             firstName: studentDataReceived.firstName,
-            lastName: studentDataReceived.lastName
-        }
+            lastName: studentDataReceived.lastName,
+        };
         try {
             // first create a user:
-            const newUser = await this.usersService.create({email, password});
+            const newUser = await this.usersService.create({ email, password });
             if (!newUser) {
                 throw new HttpException(
                     'Failed to create user 1111',
@@ -76,7 +77,8 @@ export class StudentsController {
             studentDataPure.email = createdUser.email;
             studentDataPure.password = createdUser.password;
 
-            const createdStudent = await this.studentsService.create(studentDataPure);
+            const createdStudent =
+                await this.studentsService.create(studentDataPure);
             if (!createdStudent) {
                 throw new HttpException(
                     'Failed to create student.',
@@ -85,7 +87,9 @@ export class StudentsController {
             }
 
             // Verify user was created by fetching from DB
-            const verifiedCreatedStuden = await this.studentsService['findOne'](studentDataPure.userId);
+            const verifiedCreatedStuden = await this.studentsService['findOne'](
+                studentDataPure.userId,
+            );
             if (!verifiedCreatedStuden) {
                 throw new HttpException(
                     'Student creation verification failed',
@@ -95,10 +99,11 @@ export class StudentsController {
             return {
                 statusCode: 201,
                 message: 'Student created successfully',
-                data: {...verifiedCreatedStuden, email: studentDataPure.email}
+                data: {
+                    ...verifiedCreatedStuden,
+                    email: studentDataPure.email,
+                },
             };
-            
-
         } catch (error) {
             //Handle specific errors
             if (

@@ -1,6 +1,6 @@
-import {User} from './user.interface'
+import { User } from './user.interface';
 
-export interface Instructor{
+export interface Instructor {
     id?: number;
     userId?: number;
     firstName: string;
@@ -8,10 +8,9 @@ export interface Instructor{
     profilePicture?: string;
     bio?: string;
     specialization?: string;
-    yearsOfExperience?: number,
+    yearsOfExperience?: number;
     linkedinUrl?: string;
     rating?: number;
 }
 
-export interface InstructorUser extends User, Instructor{
-}
+export interface InstructorUser extends User, Instructor {}

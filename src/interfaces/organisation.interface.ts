@@ -5,7 +5,7 @@ export interface SocialMediaType {
     whatsapp?: string;
 }
 
-export interface OrganisationType{
+export interface OrganisationType {
     id?: number;
     name: string;
     description: string;
@@ -16,7 +16,7 @@ export interface OrganisationType{
     email?: string;
     phone?: string;
     address?: string;
-    socialMedia?: string[]
+    socialMedia?: string[];
     verificationStatus?: string;
     foundedYear?: number;
     createdBy: number; // instructor.id

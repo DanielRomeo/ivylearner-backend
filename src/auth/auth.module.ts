@@ -18,9 +18,9 @@ import { JwtStrategy, RefreshTokenStrategy } from './jwt.strategy';
         JwtModule.register({
             secret: 'REFRESH_TOKEN_SECRET',
             signOptions: { expiresIn: '7d' }, // Long-lived refresh token
-          }),
+        }),
     ],
-    providers: [AuthService, JwtStrategy, RefreshTokenStrategy , LocalStrategy],
+    providers: [AuthService, JwtStrategy, RefreshTokenStrategy, LocalStrategy],
     exports: [AuthService],
 })
 export class AuthModule {}

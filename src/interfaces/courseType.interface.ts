@@ -1,5 +1,4 @@
-
-export interface CourseType{
+export interface CourseType {
     id: number;
     title: string;
     shortDescription: string;

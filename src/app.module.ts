@@ -27,6 +27,12 @@ import { LessonsModule } from './lessons/lessons.module';
         LessonsModule,
     ],
     controllers: [AppController, OrganisationsController],
-    providers: [AppService, InstructorsService, OrganisationsService, StudentsService, LessonsService],
+    providers: [
+        AppService,
+        InstructorsService,
+        OrganisationsService,
+        StudentsService,
+        LessonsService,
+    ],
 })
 export class AppModule {}

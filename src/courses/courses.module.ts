@@ -6,9 +6,9 @@ import { InstructorsModule } from 'src/instructors/instructors.module';
 import { OrganisationsModule } from 'src/organisations/organisations.module';
 
 @Module({
-  imports: [DatabaseModule, InstructorsModule, OrganisationsModule],
-  providers: [CoursesService],
-  controllers: [CoursesController],
-  exports: [CoursesService],
+    imports: [DatabaseModule, InstructorsModule, OrganisationsModule],
+    providers: [CoursesService],
+    controllers: [CoursesController],
+    exports: [CoursesService],
 })
 export class CoursesModule {}

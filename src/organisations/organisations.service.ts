@@ -9,7 +9,9 @@ export class OrganisationsService {
     constructor(private readonly databaseProvider: DatabaseProvider) {}
 
     // Find the first organization created by an instructor
-    async findFirstByInstructor(instructorId: number): Promise<OrganisationType | null> {
+    async findFirstByInstructor(
+        instructorId: number,
+    ): Promise<OrganisationType | null> {
         const db = this.databaseProvider.getDb();
 
         const [firstOrganisation] = await db
@@ -34,7 +36,9 @@ export class OrganisationsService {
     }
 
     // Create an organization
-    async create(organisationData: OrganisationType): Promise<OrganisationType> {
+    async create(
+        organisationData: OrganisationType,
+    ): Promise<OrganisationType> {
         const db = this.databaseProvider.getDb();
 
         const [newOrganization] = await db

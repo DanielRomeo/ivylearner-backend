@@ -32,7 +32,7 @@ export class UsersController {
     @UseGuards(LocalAuthGuard)
     @Post('login')
     async login(@Request() req) {
-        console.log(req.user)
+        console.log(req.user);
         const accessToken = await this.authService.login(req.user);
         return {
             statusCode: 200,
@@ -40,9 +40,9 @@ export class UsersController {
             data: {
                 access_token: accessToken['access_token'],
                 user: {
-                    id: req.user.id
-                }
-            }
+                    id: req.user.id,
+                },
+            },
         };
     }
 

@@ -5,7 +5,6 @@ import { InstructorsModule } from 'src/instructors/instructors.module';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-
     imports: [DatabaseModule, InstructorsModule],
     providers: [OrganisationsService],
     controllers: [OrganisationsController],

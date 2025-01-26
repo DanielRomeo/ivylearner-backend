@@ -1,19 +1,19 @@
 import {
     Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  HttpStatus,
-  ParseIntPipe,
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
-  HttpException,
+    Get,
+    Post,
+    Put,
+    Delete,
+    Body,
+    Param,
+    Query,
+    UseGuards,
+    HttpStatus,
+    ParseIntPipe,
+    NotFoundException,
+    BadRequestException,
+    InternalServerErrorException,
+    HttpException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CoursesService } from '../courses/courses.service';
@@ -25,7 +25,7 @@ export class LessonsController {
     constructor(
         private readonly coursesService: CoursesService,
         private readonly lessonsService: LessonsService,
-    ){}
+    ) {}
 
     // get one lesson:
 
@@ -34,6 +34,4 @@ export class LessonsController {
     // delete one lessons:
 
     // create a lesson:
-
-    
 }

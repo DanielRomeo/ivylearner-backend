@@ -13,18 +13,17 @@ import {
     HttpStatus,
     HttpCode,
     ParseIntPipe,
-    NotFoundException
+    NotFoundException,
 } from '@nestjs/common';
 
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
-import {Instructor, InstructorUser} from '../interfaces/instructor.interface' // Instructor type
-import {User} from '../interfaces/user.interface'
+import { Instructor, InstructorUser } from '../interfaces/instructor.interface'; // Instructor type
+import { User } from '../interfaces/user.interface';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-
 
 @Controller('instructors')
 export class InstructorsController {
@@ -38,13 +37,12 @@ export class InstructorsController {
     @Post('create')
     // @HttpCode(201)
     async create(@Body() instructorDataRecieved: InstructorUser) {
-
         // Check if all required fields are provided
         const { email, password, firstName, lastName } = instructorDataRecieved;
         if (!email || !password || !firstName || !lastName) {
             throw new HttpException(
                 'Missing required fields',
-                HttpStatus.BAD_REQUEST
+                HttpStatus.BAD_REQUEST,
             );
         }
 
@@ -53,12 +51,12 @@ export class InstructorsController {
             email: null,
             password: null,
             firstName: instructorDataRecieved.firstName,
-            lastName: instructorDataRecieved.lastName
-        }
+            lastName: instructorDataRecieved.lastName,
+        };
 
         try {
             // first create a user:
-            const newUser = await this.usersService.create({email, password});
+            const newUser = await this.usersService.create({ email, password });
             if (!newUser) {
                 throw new HttpException(
                     'Failed to create user 1111',
@@ -80,7 +78,8 @@ export class InstructorsController {
             instructorDataPure.email = createdUser.email;
             instructorDataPure.password = createdUser.password;
 
-            const createdInstructor = await this.instructorService.create(instructorDataPure);
+            const createdInstructor =
+                await this.instructorService.create(instructorDataPure);
             if (!createdInstructor) {
                 throw new HttpException(
                     'Failed to create instuctor.',
@@ -89,7 +88,9 @@ export class InstructorsController {
             }
 
             // Verify user was created by fetching from DB
-            const verifiedCreatedInstructor = await this.instructorService['findOne'](instructorDataPure.userId);
+            const verifiedCreatedInstructor = await this.instructorService[
+                'findOne'
+            ](instructorDataPure.userId);
             if (!verifiedCreatedInstructor) {
                 throw new HttpException(
                     'Instructor creation verification failed',
@@ -99,10 +100,11 @@ export class InstructorsController {
             return {
                 statusCode: 201,
                 message: 'Instructor created successfully',
-                data: {...verifiedCreatedInstructor, email: instructorDataPure.email}
+                data: {
+                    ...verifiedCreatedInstructor,
+                    email: instructorDataPure.email,
+                },
             };
-            
-
         } catch (error) {
             //Handle specific errors
             if (
@@ -130,11 +132,11 @@ export class InstructorsController {
         // At this point, req.user contains the authenticated user from LocalStrategy
         // Get the instructor details using the user ID
         const instructor = await this.instructorService['findOne'](req.user.id);
-        
+
         if (!instructor) {
             throw new HttpException(
                 'Instructor not found',
-                HttpStatus.NOT_FOUND
+                HttpStatus.NOT_FOUND,
             );
         }
 
@@ -147,27 +149,24 @@ export class InstructorsController {
                 access_token: accessToken['access_token'],
                 instructor: {
                     ...instructor,
-                    email: req.user.email
-                }
-            }
+                    email: req.user.email,
+                },
+            },
         };
     }
 
     // get an instructor:
     @UseGuards(JwtAuthGuard)
     @Get(':userId')
-    async findOne(
-        @Param('userId', ParseIntPipe) userId: number
-    ) {
+    async findOne(@Param('userId', ParseIntPipe) userId: number) {
         const instructor = await this.instructorService['findOne'](userId);
-        if(!instructor){
+        if (!instructor) {
             throw new NotFoundException('Instructor not found');
-
         }
-       
+
         return {
             statusCode: 200,
-            data:instructor
+            data: instructor,
         };
     }
 
@@ -183,6 +182,4 @@ export class InstructorsController {
     // controller to update an instructor:
 
     // constroller to get an instructor:
-
-    
 }
