@@ -58,14 +58,20 @@ export class CoursesController {
     ) {
         try {
             // Convert instructor user ID to the instructor ID
-            const instructorId = await this.instructorsService.getInstructorIdGivenInstructorUser_id(instructor.id);
+            const instructorId =
+                await this.instructorsService.getInstructorIdGivenInstructorUser_id(
+                    instructor.id,
+                );
             // console.log(instructor)
             if (!instructorId) {
                 throw new NotFoundException('Instructor not found');
             }
 
             // Fetch courses owned by the instructor
-            const courses = await this.coursesService.findCoursesByInstructorId(instructor.id, { limit, offset });
+            const courses = await this.coursesService.findCoursesByInstructorId(
+                instructor.id,
+                { limit, offset },
+            );
 
             return {
                 statusCode: 200,
@@ -74,17 +80,18 @@ export class CoursesController {
             };
         } catch (error) {
             console.error(error);
-            throw new InternalServerErrorException('Failed to retrieve courses');
+            throw new InternalServerErrorException(
+                'Failed to retrieve courses',
+            );
         }
     }
-    
 
     // Get a single course
     @Get(':id')
     @UseGuards(JwtAuthGuard)
     async getCourse(
         @Param('id', ParseIntPipe) id: number,
-        @CurrentUser() user
+        @CurrentUser() user,
     ) {
         try {
             const course = await this.coursesService.findOne(id);
@@ -113,7 +120,7 @@ export class CoursesController {
     async editCourse(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCourseDto: UpdateCourseDto,
-        @CurrentUser() instructor
+        @CurrentUser() instructor,
     ) {
         try {
             const updatedCourse = await this.coursesService.updateCourse(id, {

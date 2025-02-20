@@ -44,9 +44,9 @@ export class StudentsController {
     @Post('create')
     // @HttpCode(201)
     async create(@Body() studentDataReceived: StudentUser) {
-        let { email, password } = studentDataReceived;
+        const { email, password } = studentDataReceived;
 
-        let studentDataPure: StudentUser = {
+        const studentDataPure: StudentUser = {
             userId: null,
             email: null,
             password: null,

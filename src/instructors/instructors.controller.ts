@@ -46,7 +46,7 @@ export class InstructorsController {
             );
         }
 
-        let instructorDataPure: InstructorUser = {
+        const instructorDataPure: InstructorUser = {
             userId: null,
             email: null,
             password: null,
