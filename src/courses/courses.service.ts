@@ -131,6 +131,8 @@ export class CoursesService {
             .offset(options.offset);
 
         return results.map((courseData) => ({
+
+        return results.map((courseData) => ({
             ...courseData,
             tags: courseData.tags ? JSON.parse(courseData.tags) : null, // Parse tags back to array
         }));

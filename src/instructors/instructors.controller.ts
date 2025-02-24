@@ -46,7 +46,7 @@ export class InstructorsController {
             );
         }
 
-        let instructorDataPure: InstructorUser = {
+        const instructorDataPure: InstructorUser = {
             userId: null,
             email: null,
             password: null,
@@ -156,7 +156,7 @@ export class InstructorsController {
     }
 
     // get an instructor:
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard)
     @Get(':userId')
     async findOne(@Param('userId', ParseIntPipe) userId: number) {
         const instructor = await this.instructorService['findOne'](userId);

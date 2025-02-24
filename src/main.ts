@@ -1,30 +1,43 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-
-import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/libsql';
-
+import { createClient } from '@libsql/client';
 import 'dotenv/config';
-import { eq } from 'drizzle-orm';
 
-const db = drizzle(process.env.DB_FILE_NAME!); // Initializes the database connection using Drizzle ORM
+const dbFileName = process.env.DB_FILE_NAME;
+
+if (!dbFileName) {
+    throw new Error('DB_FILE_NAME is not defined in environment variables');
+}
+
+const client = createClient({
+    url: `file:${dbFileName}`,
+});
+
+const db = drizzle(client);
 
 async function bootstrap() {
-    // Logs the DB file path to check if it's correct
-
     const app = await NestFactory.create(AppModule);
-    app.enableCors();
+
+    app.enableCors({
+        origin: ['https://ivylearner.netlify.app', 'http://localhost:3000', 'https://ivylearner-backend.onrender.com'], // Allow requests only from this frontend
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+        allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+        credentials: true, // If you are using cookies or authentication
+    });
+
     app.setGlobalPrefix('api');
+
     app.useGlobalPipes(
         new ValidationPipe({
-            transform: true, // Critical for query param parsing
+            transform: true,
             transformOptions: { enableImplicitConversion: true },
         }),
     );
+
     await app.listen(process.env.PORT ?? 5000);
-    console.log('Database file:', process.env.DB_FILE_NAME);
-    console.log('Database Path:', process.env.DATABASE_PATH);
+    console.log('Server running on port:', process.env.PORT ?? 5000);
 }
 
-bootstrap(); // Calls the bootstrap function to start the app
+bootstrap();
