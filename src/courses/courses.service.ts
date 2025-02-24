@@ -33,8 +33,8 @@ interface CourseQueryParams {
 export class CoursesService {
     constructor(private readonly databaseProvider: DatabaseProvider) {}
 
-     // Find a single course by ID
-     async findOne(id: number) {
+    // Find a single course by ID
+    async findOne(id: number) {
         const db = this.databaseProvider.getDb();
         const result = await db
             .select()
@@ -57,12 +57,14 @@ export class CoursesService {
     // Update a course
     async updateCourse(
         id: number,
-        updateData: Partial<CreateCourseDto> & { lastUpdated: Date }
+        updateData: Partial<CreateCourseDto> & { lastUpdated: Date },
     ) {
         const db = this.databaseProvider.getDb();
 
         // Convert tags to JSON string if provided
-        const tagsString = updateData.tags ? JSON.stringify(updateData.tags) : undefined;
+        const tagsString = updateData.tags
+            ? JSON.stringify(updateData.tags)
+            : undefined;
 
         // Update the course
         const [updatedCourse] = await db
@@ -83,6 +85,7 @@ export class CoursesService {
             ...updatedCourse,
             tags: updatedCourse.tags ? JSON.parse(updatedCourse.tags) : null,
         };
+    }
 
     // create a course:
     async create(
@@ -115,7 +118,10 @@ export class CoursesService {
     }
 
     // find the courses owned by an instructor:
-    async findCoursesByInstructorId(instructorId: number, options: { limit: number; offset: number }) {
+    async findCoursesByInstructorId(
+        instructorId: number,
+        options: { limit: number; offset: number },
+    ) {
         const db = this.databaseProvider.getDb();
         const results = await db
             .select()
@@ -123,11 +129,10 @@ export class CoursesService {
             .where(eq(course.createdBy, instructorId))
             .limit(options.limit)
             .offset(options.offset);
-    
-        return results.map(courseData => ({
+
+        return results.map((courseData) => ({
             ...courseData,
             tags: courseData.tags ? JSON.parse(courseData.tags) : null, // Parse tags back to array
         }));
     }
-    
 }
