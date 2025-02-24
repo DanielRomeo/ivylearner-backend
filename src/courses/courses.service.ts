@@ -130,7 +130,6 @@ export class CoursesService {
             .limit(options.limit)
             .offset(options.offset);
 
-        return results.map((courseData) => ({
 
         return results.map((courseData) => ({
             ...courseData,
