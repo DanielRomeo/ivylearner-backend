@@ -21,10 +21,14 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     app.enableCors({
-        origin: ['https://ivylearner.netlify.app', 'http://localhost:3000', 'https://ivylearner-backend.onrender.com'], // Allow requests only from this frontend
+        // origin: ['https://ivylearner.netlify.app', 'http://localhost:3000', 'https://ivylearner-backend.onrender.com'], // Allow requests only from this frontend
+        origin: '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
         allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
-        credentials: true, // If you are using cookies or authentication
+       //credentials: true, // If you are using cookies or authentication // will have to switch this back on when going production
+       // and that will mean the frontend will have to send every request with a:
+       //axios.get('https://your-live-backend.com/api/some-route', { withCredentials: true });  <- That credentials object... for every frontend endpoint
+
     });
 
     app.setGlobalPrefix('api');
