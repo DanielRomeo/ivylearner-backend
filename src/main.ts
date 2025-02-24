@@ -21,7 +21,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     app.enableCors({
-        origin: ['https://ivylearner.netlify.app', 'http://localhost:3000'], // Allow requests only from this frontend
+        origin: ['https://ivylearner.netlify.app', 'http://localhost:3000', 'https://ivylearner-backend.onrender.com'], // Allow requests only from this frontend
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
         allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
         credentials: true, // If you are using cookies or authentication
