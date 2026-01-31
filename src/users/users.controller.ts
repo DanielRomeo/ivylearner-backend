@@ -24,43 +24,37 @@ import {
     ApiBody,
     ApiProperty,
 } from '@nestjs/swagger';
+import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
 import { LocalAuthGuard } from '../auth/local-auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../interfaces/user.interface';
-import { UserRole } from '../database/schema';  // ← import the literal union
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod'; // Add this import
-import { ZodValidationPipe } from 'nestjs-zod'; // or use built-in ValidationPipe with transform
 
-export const CreateUserSchema = z.object({
-  email: z.string().email({ message: 'Invalid email format' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  role: z.enum(['student', 'instructor', 'admin'] as const).default('student'),
-});
-
-// DTO classes for Swagger documentation
-class CreateUserDto extends createZodDto(CreateUserSchema) {
+// DTO classes for Swagger documentation and validation
+class CreateUserDto {
     @ApiProperty({ 
         example: 'john@example.com',
         description: 'User email address'
     })
-    email: string;
+    @IsEmail({}, { message: 'Invalid email format' })
+    email!: string;
 
     @ApiProperty({ 
         example: 'SecurePass123!',
         description: 'User password (min 6 characters)'
     })
-    password: string;
+    @IsString()
+    @MinLength(6, { message: 'Password must be at least 6 characters' })
+    password!: string;
 
     @ApiProperty({ 
         example: 'John',
         description: 'User first name',
         required: false
     })
+    @IsOptional()
+    @IsString()
     firstName?: string;
 
     @ApiProperty({ 
@@ -68,15 +62,20 @@ class CreateUserDto extends createZodDto(CreateUserSchema) {
         description: 'User last name',
         required: false
     })
+    @IsOptional()
+    @IsString()
     lastName?: string;
 
     @ApiProperty({ 
         example: 'student',
         description: 'User role',
         enum: ['student', 'instructor', 'admin'],
-        default: 'student'
+        default: 'student',
+        required: false
     })
-    role?: string;
+    @IsOptional()
+    @IsEnum(['student', 'instructor', 'admin'], { message: 'Role must be student, instructor, or admin' })
+    role?: 'student' | 'instructor' | 'admin';
 }
 
 class LoginDto {
@@ -84,13 +83,15 @@ class LoginDto {
         example: 'john@example.com',
         description: 'User email address'
     })
-    email: string;
+    @IsEmail({}, { message: 'Invalid email format' })
+    email!: string;
 
     @ApiProperty({ 
         example: 'SecurePass123!',
         description: 'User password'
     })
-    password: string;
+    @IsString()
+    password!: string;
 }
 
 class UpdateUserDto {
@@ -99,6 +100,8 @@ class UpdateUserDto {
         description: 'User email address',
         required: false
     })
+    @IsOptional()
+    @IsEmail({}, { message: 'Invalid email format' })
     email?: string;
 
     @ApiProperty({ 
@@ -106,6 +109,8 @@ class UpdateUserDto {
         description: 'User first name',
         required: false
     })
+    @IsOptional()
+    @IsString()
     firstName?: string;
 
     @ApiProperty({ 
@@ -113,6 +118,8 @@ class UpdateUserDto {
         description: 'User last name',
         required: false
     })
+    @IsOptional()
+    @IsString()
     lastName?: string;
 
     @ApiProperty({ 
@@ -121,9 +128,14 @@ class UpdateUserDto {
         enum: ['student', 'instructor', 'admin'],
         required: false
     })
-    role?: string;
+    @IsOptional()
+    @IsEnum(['student', 'instructor', 'admin'], { message: 'Role must be student, instructor, or admin' })
+    role?: 'student' | 'instructor' | 'admin';
 }
 
+//==============================================================================================================
+// UsersController with detailed Swagger documentation
+//==============================================================================================================
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
@@ -232,7 +244,16 @@ export class UsersController {
     @ApiResponse({ status: 400, description: 'Invalid input data' })
     async create(@Body() userData: CreateUserDto) {
         try {
-            const newUser = await this.usersService.create(userData);
+            // The userData is now properly typed and compatible with User interface
+            const userToCreate: Partial<User> = {
+                email: userData.email,
+                password: userData.password,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                role: userData.role || 'student',
+            };
+
+            const newUser = await this.usersService.create(userToCreate);
             if (!newUser) {
                 throw new HttpException(
                     'Failed to create user',
@@ -249,7 +270,7 @@ export class UsersController {
                 );
             }
 
-            const { passwordHash, ...userWithoutPassword } = createdUser;
+            const { passwordHash, password, ...userWithoutPassword } = createdUser;
             return {
                 statusCode: 201,
                 message: 'User created successfully',

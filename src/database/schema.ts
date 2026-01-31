@@ -22,6 +22,40 @@ export const users = sqliteTable('users', {
 });
 
 // ============================================================================
+// USER PROFILES TABLE (1:1 with users)
+// ============================================================================
+export const userProfiles = sqliteTable(
+    'user_profiles',
+    {
+        userId: integer('user_id', { mode: 'number' })
+            .primaryKey()
+            .references(() => users.id, { onDelete: 'cascade' }),
+        profilePictureUrl: text('profile_picture_url'),
+        timezone: text('timezone').default('Africa/Johannesburg'),
+        country: text('country').default('ZA'),
+        bio: text('bio'),
+        // Flexible JSON for student/instructor-specific fields
+        customData: text('custom_data', { mode: 'json' }).$type<{
+            student?: {
+                interests: string[];
+                learningGoals?: string;
+                preferredStyles?: string[];
+            };
+            instructor?: {
+                expertise: string[];
+                certifications?: Array<{ name: string; issuer: string; date?: string }>;
+                yearsExperience?: number;
+                teachingStyle?: string;
+            };
+        } | null>(),
+        updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    },
+    (table) => ({
+        userIdIdx: uniqueIndex('user_profiles_user_id_idx').on(table.userId),
+    })
+);
+
+// ============================================================================
 // ORGANIZATIONS TABLE
 // ============================================================================
 export const organizations = sqliteTable('organizations', {
@@ -50,10 +84,10 @@ export const organizationMembers = sqliteTable(
     {
         organizationId: integer('organization_id', { mode: 'number' })
             .notNull()
-            .references(() => organizations.id),
+            .references(() => organizations.id, { onDelete: 'cascade' }),
         userId: integer('user_id', { mode: 'number' })
             .notNull()
-            .references(() => users.id),
+            .references(() => users.id, { onDelete: 'cascade' }),
         role: text('role', { enum: ['owner', 'admin', 'instructor', 'student'] })
             .notNull()
             .default('student'),
@@ -71,7 +105,7 @@ export const courses = sqliteTable('courses', {
     id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
     organizationId: integer('organization_id', { mode: 'number' })
         .notNull()
-        .references(() => organizations.id),
+        .references(() => organizations.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     slug: text('slug').unique(),
     description: text('description'),
@@ -96,10 +130,10 @@ export const courseInstructors = sqliteTable(
     {
         courseId: integer('course_id', { mode: 'number' })
             .notNull()
-            .references(() => courses.id),
+            .references(() => courses.id, { onDelete: 'cascade' }),
         userId: integer('user_id', { mode: 'number' })
             .notNull()
-            .references(() => users.id),
+            .references(() => users.id, { onDelete: 'cascade' }),
         role: text('role', { enum: ['primary', 'co_instructor', 'ta'] })
             .notNull()
             .default('co_instructor'),
@@ -117,10 +151,10 @@ export const enrollments = sqliteTable('enrollments', {
     id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
     userId: integer('user_id', { mode: 'number' })
         .notNull()
-        .references(() => users.id),
+        .references(() => users.id, { onDelete: 'cascade' }),
     courseId: integer('course_id', { mode: 'number' })
         .notNull()
-        .references(() => courses.id),
+        .references(() => courses.id, { onDelete: 'cascade' }),
     enrolledAt: integer('enrolled_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     completedAt: integer('completed_at', { mode: 'timestamp' }),
     paymentStatus: text('payment_status', { 
@@ -136,7 +170,7 @@ export const lessons = sqliteTable('lessons', {
     id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
     courseId: integer('course_id', { mode: 'number' })
         .notNull()
-        .references(() => courses.id),
+        .references(() => courses.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     orderIndex: integer('order_index', { mode: 'number' }).notNull(),
     contentType: text('content_type', { 
@@ -159,10 +193,10 @@ export const lessonProgress = sqliteTable('lesson_progress', {
     id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
     enrollmentId: integer('enrollment_id', { mode: 'number' })
         .notNull()
-        .references(() => enrollments.id),
+        .references(() => enrollments.id, { onDelete: 'cascade' }),
     lessonId: integer('lesson_id', { mode: 'number' })
         .notNull()
-        .references(() => lessons.id),
+        .references(() => lessons.id, { onDelete: 'cascade' }),
     completed: integer('completed', { mode: 'boolean' }).default(false),
     watchedPercentage: real('watched_percentage').default(0),
     lastWatchedAt: integer('last_watched_at', { mode: 'timestamp' }),
@@ -173,6 +207,9 @@ export const lessonProgress = sqliteTable('lesson_progress', {
 // ============================================================================
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type NewUserProfile = typeof userProfiles.$inferInsert;
 
 export type Organization = typeof organizations.$inferSelect;
 export type NewOrganization = typeof organizations.$inferInsert;
@@ -194,6 +231,3 @@ export type NewLesson = typeof lessons.$inferInsert;
 
 export type LessonProgress = typeof lessonProgress.$inferSelect;
 export type NewLessonProgress = typeof lessonProgress.$inferInsert;
-
-//
-export type UserRole = 'student' | 'instructor' | 'admin';

@@ -14,6 +14,9 @@ import { AuthModule } from './auth/auth.module';
 // import { StudentsService } from './students/students.service';
 // import { LessonsService } from './lessons/lessons.service';
 // import { LessonsModule } from './lessons/lessons.module';
+//    import { OrganizationsModule } from '../organizations/organizations.module';
+import { OrganizationsModule } from './organizations/organizations.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
     imports: [
@@ -22,8 +25,8 @@ import { AuthModule } from './auth/auth.module';
         UsersModule,
         AuthModule,
         // InstructorsModule,
-        // OrganisationsModule,
-        // CoursesModule,
+        OrganizationsModule,
+        CoursesModule,
         // LessonsModule,
     ],
     // controllers: [AppController, OrganisationsController],

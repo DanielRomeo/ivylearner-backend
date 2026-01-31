@@ -1,5 +1,5 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { DatabaseProvider } from '../database/database.provider';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { DatabaseProvider } from 'src/database/database.provider';
 import { users } from '../database/schema';
 import { eq } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
@@ -12,16 +12,16 @@ export type User = {
     firstName?: string;
     lastName?: string;
     role?: 'student' | 'instructor' | 'admin';
+    createdAt?: Date;
+    updatedAt?: Date;
 };
 
 @Injectable()
 export class UsersService {
     constructor(private readonly databaseProvider: DatabaseProvider) {}
 
-    /**
-     * Find one user by email (includes password for authentication)
-     */
-    async findOne(email: string): Promise<any> {
+    // Find one user by email
+    async findOne(email: string): Promise<User | null> {
         const db = this.databaseProvider.getDb();
         const [userInfo] = await db
             .select()
@@ -30,131 +30,94 @@ export class UsersService {
         return userInfo ?? null;
     }
 
-    /**
-     * Find user by ID (without password)
-     */
-    async findById(id: number): Promise<any> {
+    // Find one user by ID
+    async findById(id: number): Promise<User | null> {
         const db = this.databaseProvider.getDb();
-        const [user] = await db.select().from(users).where(eq(users.id, id));
-
-        if (!user) {
+        const [userInfo] = await db
+            .select()
+            .from(users)
+            .where(eq(users.id, id));
+        
+        if (!userInfo) {
             throw new NotFoundException(`User with ID ${id} not found`);
         }
 
-        const { passwordHash, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        const { passwordHash, ...userWithoutPassword } = userInfo;
+        return userWithoutPassword as User;
     }
 
-    /**
-     * Find all users (without passwords)
-     */
-    async findAll(): Promise<any[]> {
+    // Find all users
+    async findAll(): Promise<User[]> {
         const db = this.databaseProvider.getDb();
         const allUsers = await db.select().from(users);
-
-        return allUsers.map(({ passwordHash, ...user }) => user);
+        
+        // Remove password hashes from all users
+        return allUsers.map(user => {
+            const { passwordHash, ...userWithoutPassword } = user;
+            return userWithoutPassword as User;
+        });
     }
 
-    /**
-     * Create a new user
-     */
-    async create(userData: User): Promise<any> {
+    // Create a user
+    async create(userData: Partial<User>): Promise<User> {
         const db = this.databaseProvider.getDb();
 
-        // Check if user already exists
-        const existingUser = await this.findOne(userData.email);
-        if (existingUser) {
-            throw new ConflictException('User with this email already exists');
-        }
-
-        // Hash the password
-        const passwordHash = await bcrypt.hash(
-            userData.password || 'defaultPassword',
-            10,
-        );
+        // Hash the password before storing
+        const hashedPassword = await bcrypt.hash(userData.password || '', 10);
 
         const [newUser] = await db
             .insert(users)
             .values({
-                email: userData.email,
-                passwordHash: passwordHash,
+                email: userData.email!,
+                passwordHash: hashedPassword,
                 firstName: userData.firstName,
                 lastName: userData.lastName,
                 role: userData.role || 'student',
-                createdAt: new Date(),
-                updatedAt: new Date(),
             })
             .returning();
 
-        const { passwordHash: _, ...userWithoutPassword } = newUser;
-        return userWithoutPassword;
+        return newUser;
     }
 
-    /**
-     * Update user
-     */
-    async update(id: number, updateData: Partial<User>): Promise<any> {
+    // Update a user
+    async update(id: number, updateData: Partial<User>): Promise<User> {
         const db = this.databaseProvider.getDb();
 
         // Check if user exists
         await this.findById(id);
 
-        // If email is being updated, check for conflicts
-        if (updateData.email) {
-            const existingUser = await this.findOne(updateData.email);
-            if (existingUser && existingUser.id !== id) {
-                throw new ConflictException('Email already in use');
-            }
-        }
-
         // Prepare update data
-        const updatePayload: any = {
-            ...updateData,
+        const dataToUpdate: any = {
             updatedAt: new Date(),
         };
 
-        // If password is being updated, hash it
+        if (updateData.email) dataToUpdate.email = updateData.email;
+        if (updateData.firstName) dataToUpdate.firstName = updateData.firstName;
+        if (updateData.lastName) dataToUpdate.lastName = updateData.lastName;
+        if (updateData.role) dataToUpdate.role = updateData.role;
+        
+        // Hash password if provided
         if (updateData.password) {
-            updatePayload.passwordHash = await bcrypt.hash(updateData.password, 10);
-            delete updatePayload.password;
+            dataToUpdate.passwordHash = await bcrypt.hash(updateData.password, 10);
         }
 
         const [updatedUser] = await db
             .update(users)
-            .set(updatePayload)
+            .set(dataToUpdate)
             .where(eq(users.id, id))
             .returning();
 
         const { passwordHash, ...userWithoutPassword } = updatedUser;
-        return userWithoutPassword;
+        return userWithoutPassword as User;
     }
 
-    /**
-     * Delete user
-     */
+    // Delete a user
     async remove(id: number): Promise<void> {
         const db = this.databaseProvider.getDb();
-        await this.findById(id); // Check if exists
+
+        // Check if user exists
+        await this.findById(id);
+
         await db.delete(users).where(eq(users.id, id));
-    }
-
-    /**
-     * Validate user credentials for login
-     */
-    async validateUser(email: string, password: string): Promise<any> {
-        const user = await this.findOne(email);
-
-        if (!user) {
-            return null;
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-
-        if (!isPasswordValid) {
-            return null;
-        }
-
-        const { passwordHash, ...userWithoutPassword } = user;
-        return userWithoutPassword;
     }
 }
