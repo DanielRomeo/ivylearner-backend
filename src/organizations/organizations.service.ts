@@ -35,6 +35,7 @@ export class OrganizationsService {
             );
         }
 
+        // Insert new organization
         const [newOrg] = await db
             .insert(organizations)
             .values({
@@ -45,15 +46,26 @@ export class OrganizationsService {
             })
             .returning();
 
-        // Automatically add the creator as an owner
-        if (newOrg && orgData.createdByUserId) {
-            await db.insert(organizationMembers).values({
+        // organizationMembers entry
+        await db
+            .insert(organizationMembers)
+            .values({
                 organizationId: newOrg.id,
-                userId: orgData.createdByUserId,
+                userId: orgData.createdByUserId!,
                 role: 'owner',
                 joinedAt: new Date(),
             });
-        }
+
+
+        // Automatically add the creator as an owner
+        // if (newOrg && orgData.createdByUserId) {
+        //     await db.insert(organizationMembers).values({
+        //         organizationId: newOrg.id,
+        //         userId: orgData.createdByUserId,
+        //         role: 'owner',
+        //         joinedAt: new Date(),
+        //     });
+        // }
 
         return newOrg;
     }

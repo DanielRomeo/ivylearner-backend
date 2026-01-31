@@ -75,7 +75,7 @@ export class CoursesService {
                     eq(organizationMembers.userId, courseData.createdByUserId!)
                 )
             );
-
+            console.log('membership:', membership);
         if (!membership || (membership.role !== 'owner' && membership.role !== 'admin' && membership.role !== 'instructor')) {
             throw new HttpException(
                 'Only organization members with instructor, admin, or owner role can create courses',
