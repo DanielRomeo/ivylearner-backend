@@ -7,7 +7,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "node -e \"console.log('Environment:', process.env.NODE_ENV)\"",
-
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -19,7 +18,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:migrate": "drizzle-kit migrate:sqlite",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
@@ -29,6 +32,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/swagger": "nestjs/swagger",
     "@nestjs/typeorm": "^10.0.2",
     "@types/passport-local": "^1.0.38",
     "better-sqlite3": "^11.7.2",

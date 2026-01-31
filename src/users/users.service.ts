@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseProvider } from 'src/database/database.provider';
-import { user } from '../database/schema'; // notice it's singular 'user', not 'users'
+import { users } from '../database/schema'; // notice it's singular 'user', not 'users'
 import { eq } from 'drizzle-orm';
 
 export type User = {
@@ -20,8 +20,8 @@ export class UsersService {
         const db = this.databaseProvider.getDb();
         const [userInfo] = await db
             .select()
-            .from(user)
-            .where(eq(user.email, email));
+            .from(users)
+            .where(eq(users.email, email));
         return userInfo ?? null;
     }
 
@@ -30,7 +30,7 @@ export class UsersService {
         const db = this.databaseProvider.getDb();
 
         const [newUser] = await db
-            .insert(user)
+            .insert(users)
             .values({
                 email: userData.email,
                 password: userData.password,

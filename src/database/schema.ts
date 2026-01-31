@@ -3,150 +3,194 @@ import {
     primaryKey,
     sqliteTable,
     text,
+    real,
+    uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
 
-export const user = sqliteTable('user', {
+// ============================================================================
+// USERS TABLE
+// ============================================================================
+export const users = sqliteTable('users', {
     id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
     email: text('email').notNull().unique(),
-    password: text('password').notNull(),
-    role: text('role').notNull(),
-    lastLogin: integer('last_login', { mode: 'timestamp' }),
+    passwordHash: text('password_hash').notNull(),
+    firstName: text('first_name'),
+    lastName: text('last_name'),
+    role: text('role', { enum: ['student', 'instructor', 'admin'] }).notNull().default('student'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
-export const instructor = sqliteTable('instructor', {
+// ============================================================================
+// ORGANIZATIONS TABLE
+// ============================================================================
+export const organizations = sqliteTable('organizations', {
     id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    userId: integer('user_id')
-        .notNull()
-        .references(() => user.id),
-    firstName: text('first_name').notNull(),
-    lastName: text('last_name').notNull(),
-    profilePicture: text('profile_picture'),
-    bio: text('bio'),
-    specialization: text('specialization'),
-    yearsOfExperience: integer('years_of_experience', { mode: 'number' }),
-    linkedinUrl: text('linkedin_url'),
-    rating: integer('rating', { mode: 'number' }),
-});
-
-export const student = sqliteTable('student', {
-    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    userId: integer('user_id')
-        .notNull()
-        .references(() => user.id),
-    firstName: text('first_name').notNull(),
-    lastName: text('last_name').notNull(),
-    profilePicture: text('profile_picture'),
-    bio: text('bio'),
-    dateOfBirth: integer('date_of_birth', { mode: 'timestamp' }),
-    educationLevel: text('education_level'),
-    interests: text('interests'),
-    preferredLanguage: text('preferred_language'),
-});
-
-export const organisation = sqliteTable('organisation', {
-    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    slug: text('slug').notNull().unique(),
     name: text('name').notNull(),
     description: text('description'),
-    shortDescription: text('short_description'),
-    banner: text('banner'),
-    logo: text('logo'),
+    logoUrl: text('logo_url'),
     website: text('website'),
-    email: text('email'),
-    phone: text('phone'),
+    contactEmail: text('contact_email'),
     address: text('address'),
-    socialMedia: text('social_media'), // JSON string containing social media links
-    verificationStatus: text('verification_status'),
     foundedYear: integer('founded_year', { mode: 'number' }),
-    createdBy: integer('created_by')
+    isPublic: integer('is_public', { mode: 'boolean' }).default(true),
+    createdByUserId: integer('created_by_user_id', { mode: 'number' })
         .notNull()
-        .references(() => instructor.id),
+        .references(() => users.id),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
-export const course = sqliteTable('course', {
-    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    title: text('title').notNull(),
-    shortDescription: text('short_description').notNull(),
-    description: text('description'),
-    thumbnail: text('thumbnail'),
-    price: integer('price', { mode: 'number' }),
-    duration: integer('duration', { mode: 'number' }), // in minutes
-    level: text('level'), // beginner, intermediate, advanced
-    prerequisites: text('prerequisites'),
-    objectives: text('objectives'),
-    tags: text('tags'), // JSON array of strings
-    language: text('language'),
-    certificateAvailable: integer('certificate_available', { mode: 'boolean' }),
-    featured: integer('featured', { mode: 'boolean' }),
-    rating: integer('rating', { mode: 'number' }),
-    enrollmentCount: integer('enrollment_count', { mode: 'number' }),
-    publishStatus: text('publish_status'), // draft, published, archived
-    publishedAt: integer('published_at', { mode: 'timestamp' }),
-    lastUpdated: integer('last_updated', { mode: 'timestamp' }),
-    organisationId: integer('organisation_id')
-        .notNull()
-        .references(() => organisation.id),
-    createdBy: integer('created_by')
-        .notNull()
-        .references(() => user.id),
-});
-
-// this is the linking table between the course and the student:
-export const enrollment = sqliteTable(
-    'enrollment',
+// ============================================================================
+// ORGANIZATION MEMBERS TABLE (Many-to-Many)
+// ============================================================================
+export const organizationMembers = sqliteTable(
+    'organization_members',
     {
-        studentId: integer('student_id', { mode: 'number' })
+        organizationId: integer('organization_id', { mode: 'number' })
             .notNull()
-            .references(() => student.id),
-        courseId: integer('course_id', { mode: 'number' })
+            .references(() => organizations.id),
+        userId: integer('user_id', { mode: 'number' })
             .notNull()
-            .references(() => course.id),
-        enrollmentDate: integer('enrollment_date', { mode: 'timestamp' }),
+            .references(() => users.id),
+        role: text('role', { enum: ['owner', 'admin', 'instructor', 'student'] })
+            .notNull()
+            .default('student'),
+        joinedAt: integer('joined_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
     },
     (table) => ({
-        pk: primaryKey({ columns: [table.studentId, table.courseId] }),
+        pk: primaryKey({ columns: [table.organizationId, table.userId] }),
     }),
 );
 
-export const lesson = sqliteTable('lesson', {
+// ============================================================================
+// COURSES TABLE
+// ============================================================================
+export const courses = sqliteTable('courses', {
     id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    organizationId: integer('organization_id', { mode: 'number' })
+        .notNull()
+        .references(() => organizations.id),
     title: text('title').notNull(),
-    content: text('content'),
-    courseId: integer('course_id')
+    slug: text('slug').unique(),
+    description: text('description'),
+    shortDescription: text('short_description'),
+    price: real('price').default(0),
+    thumbnailUrl: text('thumbnail_url'),
+    durationWeeks: integer('duration_weeks', { mode: 'number' }),
+    language: text('language').default('English'),
+    isPublished: integer('is_published', { mode: 'boolean' }).default(false),
+    createdByUserId: integer('created_by_user_id', { mode: 'number' })
         .notNull()
-        .references(() => course.id),
-    orderIndex: integer('order_index', { mode: 'number' }).notNull(),
-    duration: integer('duration', { mode: 'number' }), // in minutes
-    type: text('type'), // video, text, quiz, etc.
-    videoUrl: text('video_url'),
-    attachments: text('attachments'), // JSON array of attachment URLs
+        .references(() => users.id),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
-export const progress = sqliteTable('progress', {
-    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    userId: integer('user_id')
-        .notNull()
-        .references(() => user.id),
-    courseId: integer('course_id')
-        .notNull()
-        .references(() => course.id),
-    lessonId: integer('lesson_id').references(() => lesson.id),
-    progress: integer('progress', { mode: 'number' }),
-});
-
-export const courseProgress = sqliteTable('course_progress', {
-    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-    userId: integer('user_id')
-        .notNull()
-        .references(() => user.id),
-    courseId: integer('course_id')
-        .notNull()
-        .references(() => course.id),
-    completionPercentage: integer('completion_percentage', {
-        mode: 'number',
-    }).notNull(),
-    lastAccessed: integer('last_accessed', { mode: 'timestamp' }),
-    certificateIssued: integer('certificate_issued', { mode: 'boolean' }),
-    certificateIssuedAt: integer('certificate_issued_at', {
-        mode: 'timestamp',
+// ============================================================================
+// COURSE INSTRUCTORS TABLE (Many-to-Many)
+// ============================================================================
+export const courseInstructors = sqliteTable(
+    'course_instructors',
+    {
+        courseId: integer('course_id', { mode: 'number' })
+            .notNull()
+            .references(() => courses.id),
+        userId: integer('user_id', { mode: 'number' })
+            .notNull()
+            .references(() => users.id),
+        role: text('role', { enum: ['primary', 'co_instructor', 'ta'] })
+            .notNull()
+            .default('co_instructor'),
+        assignedAt: integer('assigned_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    },
+    (table) => ({
+        pk: primaryKey({ columns: [table.courseId, table.userId] }),
     }),
+);
+
+// ============================================================================
+// ENROLLMENTS TABLE
+// ============================================================================
+export const enrollments = sqliteTable('enrollments', {
+    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    userId: integer('user_id', { mode: 'number' })
+        .notNull()
+        .references(() => users.id),
+    courseId: integer('course_id', { mode: 'number' })
+        .notNull()
+        .references(() => courses.id),
+    enrolledAt: integer('enrolled_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    completedAt: integer('completed_at', { mode: 'timestamp' }),
+    paymentStatus: text('payment_status', { 
+        enum: ['pending', 'paid', 'free', 'refunded'] 
+    }).notNull().default('free'),
+    progressPercentage: real('progress_percentage').default(0),
 });
+
+// ============================================================================
+// LESSONS TABLE
+// ============================================================================
+export const lessons = sqliteTable('lessons', {
+    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    courseId: integer('course_id', { mode: 'number' })
+        .notNull()
+        .references(() => courses.id),
+    title: text('title').notNull(),
+    orderIndex: integer('order_index', { mode: 'number' }).notNull(),
+    contentType: text('content_type', { 
+        enum: ['video', 'text', 'quiz', 'attachment', 'live'] 
+    }).notNull(),
+    videoUrl: text('video_url'),
+    contentText: text('content_text'),
+    durationMinutes: integer('duration_minutes', { mode: 'number' }),
+    isFreePreview: integer('is_free_preview', { mode: 'boolean' }).default(false),
+    instructorId: integer('instructor_id', { mode: 'number' })
+        .references(() => users.id),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+// ============================================================================
+// LESSON PROGRESS TABLE
+// ============================================================================
+export const lessonProgress = sqliteTable('lesson_progress', {
+    id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+    enrollmentId: integer('enrollment_id', { mode: 'number' })
+        .notNull()
+        .references(() => enrollments.id),
+    lessonId: integer('lesson_id', { mode: 'number' })
+        .notNull()
+        .references(() => lessons.id),
+    completed: integer('completed', { mode: 'boolean' }).default(false),
+    watchedPercentage: real('watched_percentage').default(0),
+    lastWatchedAt: integer('last_watched_at', { mode: 'timestamp' }),
+});
+
+// ============================================================================
+// TYPES FOR TYPESCRIPT
+// ============================================================================
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+export type Organization = typeof organizations.$inferSelect;
+export type NewOrganization = typeof organizations.$inferInsert;
+
+export type OrganizationMember = typeof organizationMembers.$inferSelect;
+export type NewOrganizationMember = typeof organizationMembers.$inferInsert;
+
+export type Course = typeof courses.$inferSelect;
+export type NewCourse = typeof courses.$inferInsert;
+
+export type CourseInstructor = typeof courseInstructors.$inferSelect;
+export type NewCourseInstructor = typeof courseInstructors.$inferInsert;
+
+export type Enrollment = typeof enrollments.$inferSelect;
+export type NewEnrollment = typeof enrollments.$inferInsert;
+
+export type Lesson = typeof lessons.$inferSelect;
+export type NewLesson = typeof lessons.$inferInsert;
+
+export type LessonProgress = typeof lessonProgress.$inferSelect;
+export type NewLessonProgress = typeof lessonProgress.$inferInsert;
