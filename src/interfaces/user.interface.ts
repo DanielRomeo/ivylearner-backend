@@ -1,8 +1,12 @@
 export interface User {
     id?: number;
-    name?: string;
     email: string;
-    password: string;
-    role?: string;
-    lastLogin?: string;
+    password?: string;
+    passwordHash?: string;
+    firstName?: string;
+    lastName?: string;
+    role?: 'student' | 'instructor' | 'admin';
+    createdAt?: Date;
+    updatedAt?: Date;
+    lastLogin?: Date;
 }

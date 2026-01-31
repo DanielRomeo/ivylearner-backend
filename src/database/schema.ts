@@ -194,3 +194,6 @@ export type NewLesson = typeof lessons.$inferInsert;
 
 export type LessonProgress = typeof lessonProgress.$inferSelect;
 export type NewLessonProgress = typeof lessonProgress.$inferInsert;
+
+//
+export type UserRole = 'student' | 'instructor' | 'admin';

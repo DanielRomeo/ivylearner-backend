@@ -7,64 +7,54 @@ import {
     ParseIntPipe,
     Param,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { LocalAuthGuard } from './auth/local-auth.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
 
-// import { InstructorsService } from './instructors/instructors.service';
-// import { StudentsService } from './students/students.service';
-
+@ApiTags('App')
 @Controller()
 export class AppController {
     constructor(
         private readonly authService: AuthService,
-        // private readonly instructorsService: InstructorsService,
-        // private readonly studentsService: StudentsService,
     ) {}
 
-    // Login route using LocalAuthGuard (for username/password authentication)
-    // @UseGuards(LocalAuthGuard)
-    // @Post('login')
-    // login(@Request() req): any {
-    //     return this.authService.login(req.user);
-    // }
+    @Get()
+    @ApiOperation({ summary: 'Health check' })
+    @ApiResponse({ status: 200, description: 'API is running' })
+    getHello(): any {
+        return {
+            statusCode: 200,
+            message: 'IvyLearner API is running',
+            version: '2.0',
+        };
+    }
 
-    // Protected route using JwtAuthGuard
     @UseGuards(JwtAuthGuard)
     @Get('protected')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'Protected route test' })
+    @ApiResponse({ status: 200, description: 'Returns user from JWT' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
     getProtected(@Request() req): any {
-        return req.user;
+        return {
+            statusCode: 200,
+            message: 'You are authorized',
+            data: req.user,
+        };
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('auth/me')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'Get current authenticated user' })
+    @ApiResponse({ status: 200, description: 'Returns current user' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
     authenticateUser(@Request() req): any {
-        return req.user;
+        return {
+            statusCode: 200,
+            message: 'User retrieved successfully',
+            data: req.user,
+        };
     }
-
-    //@Get('getUserDetails/:id')
-    // async getDetails(@Param('id', ParseIntPipe) userId: number) {
-    //     // first find if the user is in the instructors table:
-    //     const userType =
-    //         await this.instructorsService['findCriminalInstructor'](userId);
-    //     // console.log(userType)
-    //     if (userType) {
-    //         return {
-    //             ...userType,
-    //             userType: 'instructor',
-    //         };
-    //     } else {
-    //         // try finding it in the students table:
-    //         const userType =
-    //             await this.studentsService['findCriminalStudent'](userId);
-    //         //    console.log(userType)
-    //         if (userType) {
-    //             return {
-    //                 ...userType,
-    //                 userType: 'student',
-    //             };
-    //         }
-    //     }
-    // }
 }

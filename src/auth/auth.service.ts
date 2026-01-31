@@ -11,22 +11,24 @@ export class AuthService {
     ) {}
 
     async validateUser(email: string, password: string): Promise<any> {
-        const user = await this.usersService.findOne(email);
+        const user = await this.usersService.validateUser(email, password);
 
-        if (user && user.password === password) {
-            const { password, email, ...rest } = user;
-            return rest;
+        if (!user) {
+            return null;
         }
-        return null;
+
+        return user;
     }
 
-    // cr
     async login(user: any) {
-        const payload = { email: user.email, sub: user.id };
+        const payload = { 
+            email: user.email, 
+            sub: user.id,
+            role: user.role 
+        };
 
         return {
             access_token: this.jwtService.sign(payload),
-            // payload: {email: user.email}
         };
     }
 }
