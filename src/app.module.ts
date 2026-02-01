@@ -17,10 +17,14 @@ import { AuthModule } from './auth/auth.module';
 //    import { OrganizationsModule } from '../organizations/organizations.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { CoursesModule } from './courses/courses.module';
+import { LessonsModule } from './lessons/lessons.module';
+import { EnrollmentsModule } from './enrollments/enrollments.module';
 
 @Module({
     imports: [
         // StudentsModule,
+        EnrollmentsModule,
+        LessonsModule,
         DatabaseModule,
         UsersModule,
         AuthModule,

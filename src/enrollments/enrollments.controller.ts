@@ -11,10 +11,96 @@ import {
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
+import {
+    ApiTags,
+    ApiOperation,
+    ApiResponse,
+    ApiBearerAuth,
+    ApiParam,
+    ApiBody,
+    ApiProperty,
+    ApiPropertyOptional
+} from '@nestjs/swagger';
 import { EnrollmentsService } from './enrollments.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorators';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsEnum, IsOptional, IsBoolean } from 'class-validator';
+
+export enum PaymentStatus {
+    PENDING = 'pending',
+    PAID = 'paid',
+    FREE = 'free',
+    REFUNDED = 'refunded',
+}
+
+export class CreateEnrollmentDto {
+    @ApiProperty({
+        description: 'ID of the course to enroll in',
+        example: 1,
+    })
+    @IsNotEmpty()
+    @IsNumber()
+    courseId: number;
+
+    @ApiPropertyOptional({
+        description: 'Payment status of the enrollment',
+        enum: PaymentStatus,
+        default: PaymentStatus.FREE,
+    })
+    @IsOptional()
+    @IsEnum(PaymentStatus)
+    paymentStatus?: PaymentStatus;
+}
+
+export class UpdateEnrollmentDto {
+    @ApiPropertyOptional({
+        description: 'Completion date of the course',
+        example: '2024-12-31T00:00:00.000Z',
+    })
+    @IsOptional()
+    completedAt?: Date;
+
+    @ApiPropertyOptional({
+        description: 'Payment status',
+        enum: PaymentStatus,
+    })
+    @IsOptional()
+    @IsEnum(PaymentStatus)
+    paymentStatus?: PaymentStatus;
+
+    @ApiPropertyOptional({
+        description: 'Progress percentage (0-100)',
+        example: 75.5,
+    })
+    @IsOptional()
+    @IsNumber()
+    progressPercentage?: number;
+}
+
+export class EnrollmentResponseDto {
+    @ApiProperty({ example: 1 })
+    id: number;
+
+    @ApiProperty({ example: 1 })
+    userId: number;
+
+    @ApiProperty({ example: 1 })
+    courseId: number;
+
+    @ApiProperty({ example: '2024-01-15T00:00:00.000Z' })
+    enrolledAt: Date;
+
+    @ApiPropertyOptional({ example: '2024-03-15T00:00:00.000Z' })
+    completedAt?: Date;
+
+    @ApiProperty({ enum: PaymentStatus, example: PaymentStatus.FREE })
+    paymentStatus: PaymentStatus;
+
+    @ApiProperty({ example: 45.5 })
+    progressPercentage: number;
+}
+
+
 
 @ApiTags('Enrollments')
 @ApiBearerAuth('JWT-auth')
