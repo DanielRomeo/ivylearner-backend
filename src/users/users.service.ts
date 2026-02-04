@@ -34,7 +34,11 @@ export class UsersService {
     async findById(id: number): Promise<User | null> {
         const db = this.databaseProvider.getDb();
         const [userInfo] = await db
-            .select()
+            .select({
+                id: users.id,
+                email: users.email,
+                role: users.role, // Explicitly selecting the role
+            })
             .from(users)
             .where(eq(users.id, id));
         

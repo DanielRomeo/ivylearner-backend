@@ -5,7 +5,7 @@ export interface User {
     passwordHash?: string;
     firstName?: string;
     lastName?: string;
-    role?: 'student' | 'instructor' | 'admin';
+    role: 'student' | 'instructor' | 'admin';
     createdAt?: Date;
     updatedAt?: Date;
     lastLogin?: Date;

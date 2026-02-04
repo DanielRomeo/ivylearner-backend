@@ -11,12 +11,14 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthService } from './auth/auth.service';
+import { UsersService } from './users/users.service';
 
 @ApiTags('App')
 @Controller()
 export class AppController {
     constructor(
         private readonly authService: AuthService,
+        private readonly usersService: UsersService,
     ) {}
 
     @Get()
@@ -50,11 +52,14 @@ export class AppController {
     @ApiOperation({ summary: 'Get current authenticated user' })
     @ApiResponse({ status: 200, description: 'Returns current user' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
-    authenticateUser(@Request() req): any {
+    async authenticateUser(@Request() req) {
+
+        const user = await this.usersService.findById(req.user.id);
+        console.log('Authenticated user:', user);
         return {
             statusCode: 200,
-            message: 'User retrieved successfully',
-            data: req.user,
+            message: 'User retrieved successfully yeah',
+            data: user,
         };
     }
 }

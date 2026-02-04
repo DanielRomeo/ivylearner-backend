@@ -199,10 +199,11 @@ export class UsersController {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
-        const { password, ...userWithoutPassword } = user;
+        //const { password, ...userWithoutPassword } = user;
+      //  console.log(userWithoutPassword);
         return {
             statusCode: 200,
-            data: userWithoutPassword,
+            data: user,
         };
     }
 
