@@ -189,7 +189,8 @@ export class UsersController {
         };
     }
 
-    // New endpoint to get current user details ======================== I HAVENT ADDED SWAGGER TO THIS YET
+    // Please note : The /me endpoint is already defined in AppController for authenticated user info.
+    // so we will define it here for demonstration purposes only.
     @UseGuards(JwtAuthGuard)
     @Get('me')
     async getCurrentUser(@Request() req) {
@@ -199,8 +200,8 @@ export class UsersController {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
-        //const { password, ...userWithoutPassword } = user;
-      //  console.log(userWithoutPassword);
+        const { password, ...userWithoutPassword } = user;
+         console.log(userWithoutPassword);
         return {
             statusCode: 200,
             data: user,
