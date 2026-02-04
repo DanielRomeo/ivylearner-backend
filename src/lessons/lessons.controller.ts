@@ -274,6 +274,7 @@ export class LessonsController {
         };
     }
 
+    // get all the lessons for a course:
     @Get('course/:courseId')
     @ApiOperation({ summary: 'Get all lessons for a course' })
     async getCourseLessons(

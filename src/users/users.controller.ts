@@ -189,6 +189,23 @@ export class UsersController {
         };
     }
 
+    // New endpoint to get current user details ======================== I HAVENT ADDED SWAGGER TO THIS YET
+    @UseGuards(JwtAuthGuard)
+    @Get('me')
+    async getCurrentUser(@Request() req) {
+        const user = await this.usersService.findById(req.user.id);
+        
+        if (!user) {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+
+        const { password, ...userWithoutPassword } = user;
+        return {
+            statusCode: 200,
+            data: userWithoutPassword,
+        };
+    }
+
     @Post('create')
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ 

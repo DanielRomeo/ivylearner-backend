@@ -46,6 +46,16 @@ export class UsersService {
         return userWithoutPassword as User;
     }
 
+    // Find user by ID (used by ME))
+    async findByIdMe(id: number): Promise<User | null> {
+        const db = this.databaseProvider.getDb();
+        const [userInfo] = await db
+            .select()
+            .from(users)
+            .where(eq(users.id, id));
+        return userInfo ?? null;
+    }
+
     // Find all users
     async findAll(): Promise<User[]> {
         const db = this.databaseProvider.getDb();
