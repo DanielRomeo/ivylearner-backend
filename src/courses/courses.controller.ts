@@ -12,6 +12,8 @@ import {
     HttpCode,
     HttpStatus,
     Request,
+    // Type,
+    
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -26,6 +28,7 @@ import {
 import { IsString, IsOptional, IsBoolean, IsInt, IsNumber, IsEnum } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CoursesService } from './courses.service';
+import { Type } from 'class-transformer';
 
 // ============================================================================
 // DTOs
@@ -36,6 +39,7 @@ class CreateCourseDto {
         example: 1,
         description: 'Organization ID'
     })
+    @Type(() => Number) // Add this to ensure the value is transformed to a number
     @IsInt()
     organizationId!: number;
 
@@ -53,7 +57,7 @@ class CreateCourseDto {
     })
     @IsOptional()
     @IsString()
-    // slug?: string;
+    slug?: string;
 
     @ApiProperty({ 
         example: 'Learn the fundamentals of web development including HTML, CSS, and JavaScript',
@@ -261,7 +265,11 @@ export class CoursesController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Not an organization member with required role' })
     @ApiResponse({ status: 404, description: 'Organization not found' })
+    
+    
+
     async create(@Body() createDto: CreateCourseDto, @Request() req) {
+        console.log("Received request to create course with data:", createDto); // Debug log
         const course = await this.coursesService.create({
             ...createDto,
             createdByUserId: req.user.id,
