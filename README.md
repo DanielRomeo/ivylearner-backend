@@ -1,5 +1,10 @@
 # IvyLearner Backend v2.0 - Updated
 
+questions to ask myself::::::
+when a student gets enrolled(enrolls themselves)- do they now also automatically get added to organization_memebers table?
+coz this should happen automatically.
+and when a student unenrolls from a course, then the student needs to be removed from teh organizations_members table IF student is not part of any of the courses owned by the organisation...
+
 ## 🚀 Quick Setup
 
 ### 1. Install Dependencies
