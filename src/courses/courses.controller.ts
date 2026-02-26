@@ -224,6 +224,7 @@ class UpdateInstructorRoleDto {
 // CONTROLLER
 // ============================================================================
 
+
 @ApiTags('Courses')
 @Controller('courses')
 export class CoursesController {
@@ -266,7 +267,7 @@ export class CoursesController {
     @ApiResponse({ status: 403, description: 'Forbidden - Not an organization member with required role' })
     @ApiResponse({ status: 404, description: 'Organization not found' })
     
-    
+   
 
     async create(@Body() createDto: CreateCourseDto, @Request() req) {
         console.log("Received request to create course with data:", createDto); // Debug log
@@ -281,6 +282,17 @@ export class CoursesController {
             data: course,
         };
     }
+
+    
+        @Get('public/stats')
+        async getPublicStats() {
+            return this.coursesService.getPublicStats();
+        }
+
+        @Get('public/featured')
+        async getFeaturedCourses() {
+            return this.coursesService.getFeaturedCourses();
+        }
 
     @Get()
     @ApiOperation({ 

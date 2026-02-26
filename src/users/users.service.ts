@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { DatabaseProvider } from 'src/database/database.provider';
 import { users } from '../database/schema';
 import { eq } from 'drizzle-orm';
@@ -48,6 +48,30 @@ export class UsersService {
 
         const { passwordHash, ...userWithoutPassword } = userInfo;
         return userWithoutPassword as User;
+    }
+
+    async updateMe(userId: number, data: { firstName?: string; lastName?: string; bio?: string }) {
+        const db = this.databaseProvider.getDb();
+
+        const [updated] = await db
+            .update(users)
+            .set({
+                ...(data.firstName !== undefined && { firstName: data.firstName }),
+                ...(data.lastName !== undefined && { lastName: data.lastName }),
+                // bio is not yet in the new users table schema.
+                // Add it to the schema first, then uncomment this:
+                // ...(data.bio !== undefined && { bio: data.bio }),
+                updatedAt: new Date(),
+            })
+            .where(eq(users.id, userId))
+            .returning();
+
+        if (!updated) {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+
+        const { password, ...safeUser } = updated as any;
+        return safeUser;
     }
 
     // Find user by ID (used by ME))

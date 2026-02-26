@@ -189,6 +189,16 @@ export class UsersController {
         };
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Put('me')
+    async updateMe(
+        @Request() req,
+        @Body() body: { firstName?: string; lastName?: string; bio?: string },
+    ) {
+        // req.user.id is set by your JwtStrategy (sub -> id)
+        return this.usersService.updateMe(req.user.id, body);
+    }
+
     // Please note : The /me endpoint is already defined in AppController for authenticated user info.
     // so we will define it here for demonstration purposes only.
     @UseGuards(JwtAuthGuard)

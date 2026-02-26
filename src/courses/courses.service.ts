@@ -6,11 +6,12 @@ import {
     organizations,
     users,
     organizationMembers,
+    enrollments,
     Course, 
     NewCourse, 
     CourseInstructor 
 } from '../database/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 // slug
 
@@ -45,6 +46,8 @@ export class CoursesService {
 
         return slug;
     }
+
+ 
 
     // Create a new course
     async create(courseData: Partial<NewCourse>): Promise<Course> {
@@ -121,6 +124,62 @@ export class CoursesService {
         const allCourses = await db.select().from(courses);
         return allCourses;
     }
+
+    // Get public stats (total courses and total students)
+    async getPublicStats(): Promise<{ totalCourses: number; totalStudents: number }> {
+        const db = this.databaseProvider.getDb();
+
+        const [courseCount] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(courses)
+            .where(eq(courses.isPublished, true));
+
+        const [studentCount] = await db
+            .select({ count: sql<number>`count(distinct ${enrollments.userId})` })
+            .from(enrollments);
+
+        return {
+            totalCourses: Number(courseCount?.count ?? 0),
+            totalStudents: Number(studentCount?.count ?? 0),
+        };
+    }
+
+    async getFeaturedCourses() {
+        const db = this.databaseProvider.getDb();
+
+        const featured = await db
+            .select({
+                id: courses.id,
+                title: courses.title,
+                slug: courses.slug,
+                shortDescription: courses.shortDescription,
+                thumbnailUrl: courses.thumbnailUrl,
+                instructorFirstName: users.firstName,
+                instructorLastName: users.lastName,
+                enrollmentCount: sql<number>`count(${enrollments.id})`,
+            })
+            .from(courses)
+            .leftJoin(enrollments, eq(enrollments.courseId, courses.id))
+            .leftJoin(users, eq(users.id, courses.createdByUserId))
+            .where(eq(courses.isPublished, true))
+            .groupBy(
+                courses.id,
+                courses.title,
+                courses.slug,
+                courses.shortDescription,
+                courses.thumbnailUrl,
+                users.firstName,
+                users.lastName,
+            )
+            .orderBy(sql`count(${enrollments.id}) desc`)
+            .limit(3);
+
+        return featured.map((c) => ({
+            ...c,
+            enrollmentCount: Number(c.enrollmentCount),
+        }));
+    }
+
 
     // Get published courses only
     async findPublished(organizationId?: number): Promise<Course[]> {
