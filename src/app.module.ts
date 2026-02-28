@@ -19,6 +19,8 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { CoursesModule } from './courses/courses.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { EnrollmentsModule } from './enrollments/enrollments.module';
+import { UserProfilesModule } from './user-profiles/user-profiles.module';
+
 
 @Module({
     imports: [
@@ -31,6 +33,7 @@ import { EnrollmentsModule } from './enrollments/enrollments.module';
         // InstructorsModule,
         OrganizationsModule,
         CoursesModule,
+        UserProfilesModule
         // LessonsModule,
     ],
     // controllers: [AppController, OrganisationsController],

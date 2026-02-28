@@ -9,7 +9,8 @@ import {
     enrollments,
     Course, 
     NewCourse, 
-    CourseInstructor 
+    CourseInstructor ,
+    userProfiles,
 } from '../database/schema';
 import { eq, and, sql } from 'drizzle-orm';
 
@@ -206,6 +207,65 @@ export class CoursesService {
         return publishedCourses;
     }
 
+    // FIND ALL PUBLISHED COURSES WITH INSTRUCTORS
+   async findAllPublished() {
+        const db = this.databaseProvider.getDb();
+
+        const publishedCourses = await db
+            .select()
+            .from(courses)
+            .where(eq(courses.isPublished, true));
+
+        if (publishedCourses.length === 0) return [];
+
+        const coursesWithInstructors = await Promise.all(
+            publishedCourses.map(async (course) => {
+                const instructors = await this.getInstructorsForCourse(course.id);
+                return { ...course, instructors };
+            }),
+        );
+
+        return coursesWithInstructors;
+    }
+
+     // ─── Private helper ───────────────────────────────────────────────────────
+    private async getInstructorsForCourse(courseId: number) {
+        const db = this.databaseProvider.getDb();
+
+        const rows = await db
+            .select({
+                userId: users.id,
+                firstName: users.firstName,
+                lastName: users.lastName,
+                email: users.email,
+                instructorRole: courseInstructors.role,
+                // These come from user_profiles via LEFT JOIN — may be null/undefined
+                profilePictureUrl: userProfiles.profilePictureUrl,
+                bio: userProfiles.bio,
+                timezone: userProfiles.timezone,
+                country: userProfiles.country,
+            })
+            .from(courseInstructors)
+            .innerJoin(users, eq(courseInstructors.userId, users.id))
+            .leftJoin(userProfiles, eq(userProfiles.userId, users.id))
+            .where(eq(courseInstructors.courseId, courseId));
+
+        // Sanitize: replace any undefined with null so SQLite serialization never breaks
+        return rows.map((row) => ({
+            userId: row.userId,
+            firstName: row.firstName ?? null,
+            lastName: row.lastName ?? null,
+            email: row.email,
+            instructorRole: row.instructorRole,
+            profilePictureUrl: row.profilePictureUrl ?? null,
+            bio: row.bio ?? null,
+            timezone: row.timezone ?? null,
+            country: row.country ?? null,
+        }));
+    }
+
+
+
     // Get course by ID
     async findById(id: number): Promise<Course> {
         const db = this.databaseProvider.getDb();
@@ -223,19 +283,18 @@ export class CoursesService {
     }
 
     // Get course by slug
-    async findBySlug(slug: string): Promise<Course> {
+    async findBySlug(slug: string) {
         const db = this.databaseProvider.getDb();
 
         const [course] = await db
             .select()
             .from(courses)
-            .where(eq(courses.slug, slug));
+            .where(and(eq(courses.slug, slug), eq(courses.isPublished, true)));
 
-        if (!course) {
-            throw new HttpException('Course not found', HttpStatus.NOT_FOUND);
-        }
+        if (!course) return null;
 
-        return course;
+        const instructors = await this.getInstructorsForCourse(course.id);
+        return { ...course, instructors };
     }
 
     // Get courses created by a specific user

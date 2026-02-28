@@ -12,6 +12,7 @@ import {
     HttpCode,
     HttpStatus,
     Request,
+    NotFoundException,
     // Type,
     
 } from '@nestjs/common';
@@ -294,60 +295,66 @@ export class CoursesController {
             return this.coursesService.getFeaturedCourses();
         }
 
+    // @Get()
+    // @ApiOperation({ 
+    //     summary: 'Get all courses with instructors',
+    //     description: 'Retrieve all courses, optionally filtered by organization or published status'
+    // })
+    // @ApiQuery({ 
+    //     name: 'organizationId', 
+    //     required: false, 
+    //     type: 'number',
+    //     description: 'Filter by organization ID'
+    // })
+    // @ApiQuery({ 
+    //     name: 'published', 
+    //     required: false, 
+    //     type: 'boolean',
+    //     description: 'Filter by published status'
+    // })
+    // @ApiResponse({ 
+    //     status: 200, 
+    //     description: 'Courses retrieved successfully',
+    //     schema: {
+    //         example: {
+    //             statusCode: 200,
+    //             message: 'Courses retrieved successfully',
+    //             data: [
+    //                 {
+    //                     id: 1,
+    //                     title: 'Introduction to Web Development',
+    //                     slug: 'intro-to-web-dev',
+    //                     shortDescription: 'Learn web development basics',
+    //                     price: 99.99,
+    //                     isPublished: true
+    //                 }
+    //             ]
+    //         }
+    //     }
+    // })
+    // async findAll(
+    //     @Query('organizationId') organizationId?: number,
+    //     @Query('published') published?: boolean
+    // ) {
+    //     let courses;
+
+    //     if (published === true) {
+    //         courses = await this.coursesService.findPublished(organizationId);
+    //     } else {
+    //         courses = await this.coursesService.findAll(organizationId);
+    //     }
+
+    //     return {
+    //         statusCode: 200,
+    //         message: 'Courses retrieved successfully',
+    //         data: courses,
+    //     };
+    // }
     @Get()
-    @ApiOperation({ 
-        summary: 'Get all courses',
-        description: 'Retrieve all courses, optionally filtered by organization or published status'
-    })
-    @ApiQuery({ 
-        name: 'organizationId', 
-        required: false, 
-        type: 'number',
-        description: 'Filter by organization ID'
-    })
-    @ApiQuery({ 
-        name: 'published', 
-        required: false, 
-        type: 'boolean',
-        description: 'Filter by published status'
-    })
-    @ApiResponse({ 
-        status: 200, 
-        description: 'Courses retrieved successfully',
-        schema: {
-            example: {
-                statusCode: 200,
-                message: 'Courses retrieved successfully',
-                data: [
-                    {
-                        id: 1,
-                        title: 'Introduction to Web Development',
-                        slug: 'intro-to-web-dev',
-                        shortDescription: 'Learn web development basics',
-                        price: 99.99,
-                        isPublished: true
-                    }
-                ]
-            }
-        }
-    })
-    async findAll(
-        @Query('organizationId') organizationId?: number,
-        @Query('published') published?: boolean
-    ) {
-        let courses;
-
-        if (published === true) {
-            courses = await this.coursesService.findPublished(organizationId);
-        } else {
-            courses = await this.coursesService.findAll(organizationId);
-        }
-
-        return {
-            statusCode: 200,
-            message: 'Courses retrieved successfully',
-            data: courses,
-        };
+    @ApiOperation({ summary: 'Get all published courses with instructors' })
+    async findAll() {
+        const data = await this.coursesService.findAllPublished();
+        return { data };
     }
 
     @Get('my-courses')
@@ -394,6 +401,19 @@ export class CoursesController {
             message: 'Course found successfully',
             data: course,
         };
+    }
+
+    
+    // ========================================================================
+    // Additional endpoint to get course by slug
+
+    // I added findOneSlug.... remember 
+    @Get(':slug')
+    @ApiOperation({ summary: 'Get a single published course by slug' })
+    async findOneSlug(@Param('slug') slug: string) {
+        const course = await this.coursesService.findBySlug(slug);
+        if (!course) throw new NotFoundException('Course not found');
+        return { data: course };
     }
 
     @Get('slug/:slug')
