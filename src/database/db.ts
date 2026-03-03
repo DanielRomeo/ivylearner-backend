@@ -2,5 +2,5 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 
 // Initialize SQLite connection
-const sqlite = new Database('ivy.db');
+const sqlite = new Database(process.env.DB_FILE_NAME!);
 export const db = drizzle(sqlite);

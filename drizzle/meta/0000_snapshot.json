@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7f318707-56bf-4350-859c-332de60719cd",
+  "id": "bf66856c-9346-49e0-aec4-00eac77d33cf",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "course_instructors": {
@@ -503,6 +503,115 @@
           "tableTo": "users",
           "columnsFrom": [
             "instructor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "live_rooms": {
+      "name": "live_rooms",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "instructor_user_id": {
+          "name": "instructor_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "daily_room_name": {
+          "name": "daily_room_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "daily_room_url": {
+          "name": "daily_room_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "live_rooms_daily_room_name_unique": {
+          "name": "live_rooms_daily_room_name_unique",
+          "columns": [
+            "daily_room_name"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "live_rooms_course_id_courses_id_fk": {
+          "name": "live_rooms_course_id_courses_id_fk",
+          "tableFrom": "live_rooms",
+          "tableTo": "courses",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "live_rooms_instructor_user_id_users_id_fk": {
+          "name": "live_rooms_instructor_user_id_users_id_fk",
+          "tableFrom": "live_rooms",
+          "tableTo": "users",
+          "columnsFrom": [
+            "instructor_user_id"
           ],
           "columnsTo": [
             "id"

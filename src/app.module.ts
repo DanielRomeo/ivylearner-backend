@@ -20,6 +20,9 @@ import { CoursesModule } from './courses/courses.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { UserProfilesModule } from './user-profiles/user-profiles.module';
+// import { LiveRoomsModule } from './live-rooms/live-rooms.module';
+import { LiveRoomsModule } from './live-rooms/live-rooms.module';
+
 
 
 @Module({
@@ -33,7 +36,8 @@ import { UserProfilesModule } from './user-profiles/user-profiles.module';
         // InstructorsModule,
         OrganizationsModule,
         CoursesModule,
-        UserProfilesModule
+        UserProfilesModule,
+        LiveRoomsModule,
         // LessonsModule,
     ],
     // controllers: [AppController, OrganisationsController],

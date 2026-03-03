@@ -203,6 +203,25 @@ export const lessonProgress = sqliteTable('lesson_progress', {
 });
 
 // ============================================================================
+// LIVE ROOMS TABLE
+// ============================================================================
+export const liveRooms = sqliteTable('live_rooms', {
+    id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
+    courseId: integer('course_id').notNull().references(() => courses.id),
+    instructorUserId: integer('instructor_user_id').notNull().references(() => users.id),
+    title: text('title').notNull(),
+    dailyRoomName: text('daily_room_name').notNull().unique(),
+    dailyRoomUrl: text('daily_room_url').notNull(),
+    status: text('status').notNull().default('active'), // 'active' | 'ended'
+    createdAt: integer('created_at'),
+    endedAt: integer('ended_at'),
+});
+
+
+
+
+
+// ============================================================================
 // TYPES FOR TYPESCRIPT
 // ============================================================================
 export type User = typeof users.$inferSelect;
@@ -231,3 +250,6 @@ export type NewLesson = typeof lessons.$inferInsert;
 
 export type LessonProgress = typeof lessonProgress.$inferSelect;
 export type NewLessonProgress = typeof lessonProgress.$inferInsert;
+
+export type LiveRoom = typeof liveRooms.$inferSelect;
+export type NewLiveRoom = typeof liveRooms.$inferInsert;

@@ -4,7 +4,7 @@
   "dialect": "sqlite",
   "driver": "better-sqlite",
   "dbCredentials": {
-    "url": "./ivy.db"
+    "url": "process.env.DB_FILE_NAME!"
   },
   "verbose": true
 }

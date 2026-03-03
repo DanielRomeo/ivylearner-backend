@@ -68,6 +68,21 @@ CREATE TABLE `lessons` (
 	FOREIGN KEY (`instructor_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `live_rooms` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`course_id` integer NOT NULL,
+	`instructor_user_id` integer NOT NULL,
+	`title` text NOT NULL,
+	`daily_room_name` text NOT NULL,
+	`daily_room_url` text NOT NULL,
+	`status` text DEFAULT 'active' NOT NULL,
+	`created_at` integer,
+	`ended_at` integer,
+	FOREIGN KEY (`course_id`) REFERENCES `courses`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`instructor_user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `live_rooms_daily_room_name_unique` ON `live_rooms` (`daily_room_name`);--> statement-breakpoint
 CREATE TABLE `organization_members` (
 	`organization_id` integer NOT NULL,
 	`user_id` integer NOT NULL,
