@@ -1,3 +1,4 @@
+// src/auth/jwt.strategy.ts
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
@@ -13,19 +14,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
-        return { 
-            id: payload.sub, 
-            email: payload.email,
-            role: payload.role,
-        };
+        // FIX: was payload.name — must be payload.email to match what auth.service signs
+        return { id: payload.sub, email: payload.email, role: payload.role };
     }
 }
 
 @Injectable()
-export class RefreshTokenStrategy extends PassportStrategy(
-    Strategy,
-    'jwt-refresh',
-) {
+export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     constructor() {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -35,10 +30,6 @@ export class RefreshTokenStrategy extends PassportStrategy(
     }
 
     async validate(payload: any) {
-        return { 
-            id: payload.sub, 
-            email: payload.email,
-            role: payload.role,
-        };
+        return { id: payload.sub, email: payload.email, role: payload.role };
     }
 }

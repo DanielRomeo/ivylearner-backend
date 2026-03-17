@@ -1,141 +1,77 @@
+// src/users/users.controller.ts
 import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Put,
-    Param,
-    Delete,
-    Request,
-    forwardRef,
-    Inject,
-    HttpException,
-    HttpStatus,
-    HttpCode,
-    UseGuards,
-    ParseIntPipe,
+    Controller, Get, Post, Body, Put, Param, Delete,
+    Request, forwardRef, Inject, HttpException, HttpStatus,
+    HttpCode, UseGuards, ParseIntPipe,
 } from '@nestjs/common';
 import {
-    ApiTags,
-    ApiOperation,
-    ApiResponse,
-    ApiBearerAuth,
-    ApiParam,
-    ApiBody,
-    ApiProperty,
+    ApiTags, ApiOperation, ApiResponse, ApiBearerAuth,
+    ApiParam, ApiBody, ApiProperty,
 } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
 import { LocalAuthGuard } from '../auth/local-auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { AuthService } from '../auth/auth.service';
-import { User } from '../interfaces/user.interface';
 
-// DTO classes for Swagger documentation and validation
 class CreateUserDto {
-    @ApiProperty({ 
-        example: 'john@example.com',
-        description: 'User email address'
-    })
+    @ApiProperty({ example: 'john@example.com' })
     @IsEmail({}, { message: 'Invalid email format' })
     email!: string;
 
-    @ApiProperty({ 
-        example: 'SecurePass123!',
-        description: 'User password (min 6 characters)'
-    })
+    @ApiProperty({ example: 'SecurePass123!' })
     @IsString()
     @MinLength(6, { message: 'Password must be at least 6 characters' })
     password!: string;
 
-    @ApiProperty({ 
-        example: 'John',
-        description: 'User first name',
-        required: false
-    })
+    @ApiProperty({ example: 'John', required: false })
     @IsOptional()
     @IsString()
     firstName?: string;
 
-    @ApiProperty({ 
-        example: 'Doe',
-        description: 'User last name',
-        required: false
-    })
+    @ApiProperty({ example: 'Doe', required: false })
     @IsOptional()
     @IsString()
     lastName?: string;
 
-    @ApiProperty({ 
-        example: 'student',
-        description: 'User role',
-        enum: ['student', 'instructor', 'admin'],
-        default: 'student',
-        required: false
-    })
+    @ApiProperty({ example: 'student', enum: ['student', 'instructor', 'admin'], required: false })
     @IsOptional()
-    @IsEnum(['student', 'instructor', 'admin'], { message: 'Role must be student, instructor, or admin' })
+    @IsEnum(['student', 'instructor', 'admin'])
     role?: 'student' | 'instructor' | 'admin';
 }
 
 class LoginDto {
-    @ApiProperty({ 
-        example: 'john@example.com',
-        description: 'User email address'
-    })
-    @IsEmail({}, { message: 'Invalid email format' })
+    @ApiProperty({ example: 'john@example.com' })
+    @IsEmail()
     email!: string;
 
-    @ApiProperty({ 
-        example: 'SecurePass123!',
-        description: 'User password'
-    })
+    @ApiProperty({ example: 'SecurePass123!' })
     @IsString()
     password!: string;
 }
 
 class UpdateUserDto {
-    @ApiProperty({ 
-        example: 'john@example.com',
-        description: 'User email address',
-        required: false
-    })
+    @ApiProperty({ required: false })
     @IsOptional()
-    @IsEmail({}, { message: 'Invalid email format' })
+    @IsEmail()
     email?: string;
 
-    @ApiProperty({ 
-        example: 'John',
-        description: 'User first name',
-        required: false
-    })
+    @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
     firstName?: string;
 
-    @ApiProperty({ 
-        example: 'Doe',
-        description: 'User last name',
-        required: false
-    })
+    @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
     lastName?: string;
 
-    @ApiProperty({ 
-        example: 'instructor',
-        description: 'User role',
-        enum: ['student', 'instructor', 'admin'],
-        required: false
-    })
+    @ApiProperty({ enum: ['student', 'instructor', 'admin'], required: false })
     @IsOptional()
-    @IsEnum(['student', 'instructor', 'admin'], { message: 'Role must be student, instructor, or admin' })
+    @IsEnum(['student', 'instructor', 'admin'])
     role?: 'student' | 'instructor' | 'admin';
 }
 
-//==============================================================================================================
-// UsersController with detailed Swagger documentation
-//==============================================================================================================
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
@@ -145,35 +81,13 @@ export class UsersController {
         private readonly authService: AuthService,
     ) {}
 
+    // POST /api/users/login
     @Post('login')
     @UseGuards(LocalAuthGuard)
     @HttpCode(HttpStatus.OK)
-    @ApiOperation({ 
-        summary: 'User login',
-        description: 'Authenticate user with email and password'
-    })
+    @ApiOperation({ summary: 'Login with email and password' })
     @ApiBody({ type: LoginDto })
-    @ApiResponse({ 
-        status: 200, 
-        description: 'Login successful',
-        schema: {
-            example: {
-                statusCode: 200,
-                message: 'Login successful',
-                data: {
-                    access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-                    user: {
-                        id: 1,
-                        email: 'john@example.com',
-                        role: 'student'
-                    }
-                }
-            }
-        }
-    })
-    @ApiResponse({ status: 401, description: 'Invalid credentials' })
-    async login(@Request() req) {
-        console.log(req.user);
+    async login(@Request() req: any) {
         const accessToken = await this.authService.login(req.user);
         return {
             statusCode: 200,
@@ -189,297 +103,105 @@ export class UsersController {
         };
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Put('me')
-    async updateMe(
-        @Request() req,
-        @Body() body: { firstName?: string; lastName?: string; bio?: string },
-    ) {
-        // req.user.id is set by your JwtStrategy (sub -> id)
-        return this.usersService.updateMe(req.user.id, body);
-    }
-
-    // Please note : The /me endpoint is already defined in AppController for authenticated user info.
-    // so we will define it here for demonstration purposes only.
+    // GET /api/users/me
     @UseGuards(JwtAuthGuard)
     @Get('me')
-    async getCurrentUser(@Request() req) {
+    async getCurrentUser(@Request() req: any) {
         const user = await this.usersService.findById(req.user.id);
-        
-        if (!user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-        }
+        if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-        const { password, ...userWithoutPassword } = user;
-         console.log(userWithoutPassword);
+        // FIX: destructure passwordHash (not 'password' — column was renamed)
+        const { passwordHash, ...userWithoutPassword } = user;
         return {
             statusCode: 200,
-            data: user,
+            data: userWithoutPassword,
         };
     }
 
+    // PUT /api/users/me
+    @UseGuards(JwtAuthGuard)
+    @Put('me')
+    async updateMe(
+        @Request() req: any,
+        @Body() body: { firstName?: string; lastName?: string; bio?: string },
+    ) {
+        return this.usersService.updateMe(req.user.id, body);
+    }
+
+    // POST /api/users/create
     @Post('create')
     @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ 
-        summary: 'Create a new user',
-        description: 'Register a new user in the system'
-    })
-    @ApiBody({ 
-        type: CreateUserDto,
-        description: 'User registration data',
-        examples: {
-            student: {
-                summary: 'Create Student',
-                value: {
-                    email: 'student@example.com',
-                    password: 'SecurePass123!',
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    role: 'student'
-                }
-            },
-            instructor: {
-                summary: 'Create Instructor',
-                value: {
-                    email: 'instructor@example.com',
-                    password: 'SecurePass123!',
-                    firstName: 'Jane',
-                    lastName: 'Smith',
-                    role: 'instructor'
-                }
-            }
-        }
-    })
-    @ApiResponse({ 
-        status: 201, 
-        description: 'User created successfully',
-        schema: {
-            example: {
-                statusCode: 201,
-                message: 'User created successfully',
-                data: {
-                    id: 1,
-                    email: 'john@example.com',
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    role: 'student',
-                    createdAt: '2024-01-01T00:00:00.000Z',
-                    updatedAt: '2024-01-01T00:00:00.000Z'
-                }
-            }
-        }
-    })
-    @ApiResponse({ status: 409, description: 'Email already exists' })
-    @ApiResponse({ status: 400, description: 'Invalid input data' })
+    @ApiOperation({ summary: 'Register a new user' })
+    @ApiBody({ type: CreateUserDto })
     async create(@Body() userData: CreateUserDto) {
         try {
-            // The userData is now properly typed and compatible with User interface
-            const userToCreate: Partial<User> = {
+            const newUser = await this.usersService.create({
                 email: userData.email,
                 password: userData.password,
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                role: userData.role || 'student',
-            };
+                role: userData.role ?? 'student',
+            });
 
-            const newUser = await this.usersService.create(userToCreate);
-            if (!newUser) {
-                throw new HttpException(
-                    'Failed to create user',
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                );
-            }
+            if (!newUser) throw new HttpException('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR);
 
-            // Verify user was created by fetching from DB
             const createdUser = await this.usersService.findOne(newUser.email);
-            if (!createdUser) {
-                throw new HttpException(
-                    'User creation verification failed',
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                );
-            }
+            if (!createdUser) throw new HttpException('User creation verification failed', HttpStatus.INTERNAL_SERVER_ERROR);
 
-            const { passwordHash, password, ...userWithoutPassword } = createdUser;
+            // FIX: only destructure passwordHash
+            const { passwordHash, ...userWithoutPassword } = createdUser;
             return {
                 statusCode: 201,
                 message: 'User created successfully',
                 data: userWithoutPassword,
             };
         } catch (error) {
-            if (
-                error instanceof Error &&
-                error.message.includes('UNIQUE constraint failed')
-            ) {
-                throw new HttpException(
-                    'Email already exists',
-                    HttpStatus.CONFLICT,
-                );
+            if (error instanceof Error && error.message.includes('unique constraint')) {
+                throw new HttpException('Email already exists', HttpStatus.CONFLICT);
             }
             console.error('User creation error:', error);
-            throw new HttpException(
-                'Failed to create user',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
+            throw new HttpException('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    // GET /api/users
     @Get()
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ 
-        summary: 'Get all users',
-        description: 'Retrieve a list of all registered users (requires authentication)'
-    })
-    @ApiResponse({ 
-        status: 200, 
-        description: 'Users retrieved successfully',
-        schema: {
-            example: {
-                statusCode: 200,
-                message: 'Users retrieved successfully',
-                data: [
-                    {
-                        id: 1,
-                        email: 'john@example.com',
-                        firstName: 'John',
-                        lastName: 'Doe',
-                        role: 'student'
-                    }
-                ]
-            }
-        }
-    })
-    @ApiResponse({ status: 401, description: 'Unauthorized - JWT token required' })
+    @ApiOperation({ summary: 'Get all users' })
     async findAll() {
         const users = await this.usersService.findAll();
-        return {
-            statusCode: 200,
-            message: 'Users retrieved successfully',
-            data: users,
-        };
+        return { statusCode: 200, message: 'Users retrieved successfully', data: users };
     }
 
+    // GET /api/users/:id
     @Get(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ 
-        summary: 'Get user by ID',
-        description: 'Retrieve a specific user by their ID (requires authentication)'
-    })
-    @ApiParam({ 
-        name: 'id', 
-        type: 'number', 
-        description: 'User ID',
-        example: 1
-    })
-    @ApiResponse({ 
-        status: 200, 
-        description: 'User found successfully',
-        schema: {
-            example: {
-                statusCode: 200,
-                message: 'User found successfully',
-                data: {
-                    id: 1,
-                    email: 'john@example.com',
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    role: 'student'
-                }
-            }
-        }
-    })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @ApiResponse({ status: 401, description: 'Unauthorized - JWT token required' })
+    @ApiOperation({ summary: 'Get user by ID' })
+    @ApiParam({ name: 'id', type: 'number' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const user = await this.usersService.findById(id);
-        return {
-            statusCode: 200,
-            message: 'User found successfully',
-            data: user,
-        };
+        return { statusCode: 200, message: 'User found successfully', data: user };
     }
 
+    // PUT /api/users/:id
     @Put(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ 
-        summary: 'Update user',
-        description: 'Update user information by ID (requires authentication)'
-    })
-    @ApiParam({ 
-        name: 'id', 
-        type: 'number', 
-        description: 'User ID',
-        example: 1
-    })
-    @ApiBody({ 
-        type: UpdateUserDto,
-        description: 'User update data',
-        examples: {
-            updateName: {
-                summary: 'Update Name',
-                value: {
-                    firstName: 'Johnny',
-                    lastName: 'Smith'
-                }
-            },
-            updateRole: {
-                summary: 'Update Role',
-                value: {
-                    role: 'instructor'
-                }
-            }
-        }
-    })
-    @ApiResponse({ 
-        status: 200, 
-        description: 'User updated successfully',
-        schema: {
-            example: {
-                statusCode: 200,
-                message: 'User updated successfully',
-                data: {
-                    id: 1,
-                    email: 'john@example.com',
-                    firstName: 'Johnny',
-                    lastName: 'Smith',
-                    role: 'instructor'
-                }
-            }
-        }
-    })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @ApiResponse({ status: 401, description: 'Unauthorized - JWT token required' })
-    async update(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() updateData: UpdateUserDto,
-    ) {
+    @ApiOperation({ summary: 'Update user' })
+    @ApiParam({ name: 'id', type: 'number' })
+    @ApiBody({ type: UpdateUserDto })
+    async update(@Param('id', ParseIntPipe) id: number, @Body() updateData: UpdateUserDto) {
         const updatedUser = await this.usersService.update(id, updateData);
-        return {
-            statusCode: 200,
-            message: 'User updated successfully',
-            data: updatedUser,
-        };
+        return { statusCode: 200, message: 'User updated successfully', data: updatedUser };
     }
 
+    // DELETE /api/users/:id
     @Delete(':id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth('JWT-auth')
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({ 
-        summary: 'Delete user',
-        description: 'Delete a user by ID (requires authentication)'
-    })
-    @ApiParam({ 
-        name: 'id', 
-        type: 'number', 
-        description: 'User ID',
-        example: 1
-    })
-    @ApiResponse({ status: 204, description: 'User deleted successfully' })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @ApiResponse({ status: 401, description: 'Unauthorized - JWT token required' })
+    @ApiOperation({ summary: 'Delete user' })
+    @ApiParam({ name: 'id', type: 'number' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         await this.usersService.remove(id);
     }

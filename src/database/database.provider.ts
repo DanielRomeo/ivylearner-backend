@@ -1,22 +1,26 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { ConfigService } from '@nestjs/config';
+// src/database/database.provider.ts
 import { Injectable } from '@nestjs/common';
-import { createClient } from '@libsql/client/.';
-
-// The symbol for the provider
-export const DRIZZLE_DB = 'DRIZZLE_DB';
+import { ConfigService } from '@nestjs/config';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
+import * as schema from './schema';
 
 @Injectable()
 export class DatabaseProvider {
-    private db: any;
+    private db: ReturnType<typeof drizzle>;
 
     constructor(private readonly configService: ConfigService) {
-        const dbFile = this.configService.get<string>('DB_FILE_NAME');
-        const client = createClient({ url: `file:${dbFile}` }); // ← create client first
-        this.db = drizzle(client); // ← then pass client to drizzle
+        const databaseUrl = this.configService.get<string>('DATABASE_URL');
+
+        if (!databaseUrl) {
+            throw new Error('DATABASE_URL is not defined in environment variables');
+        }
+
+        const sql = neon(databaseUrl);
+        this.db = drizzle(sql, { schema });
     }
 
     getDb() {
-        return this.db; // Return the DB instance
+        return this.db;
     }
 }

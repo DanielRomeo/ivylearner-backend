@@ -1,161 +1,127 @@
-import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
+// src/users/users.service.ts
+import { Injectable } from '@nestjs/common';
 import { DatabaseProvider } from 'src/database/database.provider';
 import { users } from '../database/schema';
 import { eq } from 'drizzle-orm';
-import * as bcrypt from 'bcrypt';
-
-export type User = {
-    id?: number;
-    email: string;
-    password?: string;
-    passwordHash?: string;
-    firstName?: string;
-    lastName?: string;
-    role?: 'student' | 'instructor' | 'admin';
-    createdAt?: Date;
-    updatedAt?: Date;
-};
 
 @Injectable()
 export class UsersService {
     constructor(private readonly databaseProvider: DatabaseProvider) {}
 
-    // Find one user by email
-    async findOne(email: string): Promise<User | null> {
+    async findOne(email: string) {
         const db = this.databaseProvider.getDb();
-        const [userInfo] = await db
-            .select()
-            .from(users)
-            .where(eq(users.email, email));
-        return userInfo ?? null;
+        const [user] = await db.select().from(users).where(eq(users.email, email));
+        return user ?? null;
     }
 
-    // Find one user by ID
-    async findById(id: number): Promise<User | null> {
+    async findByGoogleId(googleId: string) {
         const db = this.databaseProvider.getDb();
-        const [userInfo] = await db
-            .select({
-                id: users.id,
-                email: users.email,
-                role: users.role, // Explicitly selecting the role
+        const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
+        return user ?? null;
+    }
+
+    async findById(id: number) {
+        const db = this.databaseProvider.getDb();
+        const [user] = await db.select().from(users).where(eq(users.id, id));
+        return user ?? null;
+    }
+
+    async findAll() {
+        const db = this.databaseProvider.getDb();
+        return db.select().from(users);
+    }
+
+    // Local user creation
+    async create(userData: {
+        email: string;
+        password: string;
+        role?: 'student' | 'instructor' | 'admin';
+    }) {
+        const db = this.databaseProvider.getDb();
+        const [newUser] = await db
+            .insert(users)
+            .values({
+                email: userData.email,
+                passwordHash: userData.password,
+                role: userData.role ?? 'student',
+                authProvider: 'local',
             })
-            .from(users)
-            .where(eq(users.id, id));
-        
-        if (!userInfo) {
-            throw new NotFoundException(`User with ID ${id} not found`);
-        }
-
-        const { passwordHash, ...userWithoutPassword } = userInfo;
-        return userWithoutPassword as User;
+            .returning();
+        return newUser;
     }
 
-    async updateMe(userId: number, data: { firstName?: string; lastName?: string; bio?: string }) {
+    // Google user creation
+    async createGoogleUser(googleUser: {
+        googleId: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        avatarUrl: string;
+        googleAccessToken: string;
+    }) {
         const db = this.databaseProvider.getDb();
+        const [newUser] = await db
+            .insert(users)
+            .values({
+                email: googleUser.email,
+                firstName: googleUser.firstName,
+                lastName: googleUser.lastName,
+                googleId: googleUser.googleId,
+                googleAccessToken: googleUser.googleAccessToken,
+                avatarUrl: googleUser.avatarUrl,
+                authProvider: 'google',
+                passwordHash: null,
+                role: 'student',
+            })
+            .returning();
+        return newUser;
+    }
 
-        const [updated] = await db
+    // Update Google tokens on every Google login to keep them fresh
+    async updateGoogleTokens(
+        userId: number,
+        data: { googleId: string; googleAccessToken: string; avatarUrl: string },
+    ) {
+        const db = this.databaseProvider.getDb();
+        const [updatedUser] = await db
             .update(users)
             .set({
-                ...(data.firstName !== undefined && { firstName: data.firstName }),
-                ...(data.lastName !== undefined && { lastName: data.lastName }),
-                // bio is not yet in the new users table schema.
-                // Add it to the schema first, then uncomment this:
-                // ...(data.bio !== undefined && { bio: data.bio }),
+                googleId: data.googleId,
+                googleAccessToken: data.googleAccessToken,
+                avatarUrl: data.avatarUrl,
                 updatedAt: new Date(),
             })
             .where(eq(users.id, userId))
             .returning();
-
-        if (!updated) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-        }
-
-        const { password, ...safeUser } = updated as any;
-        return safeUser;
+        return updatedUser;
     }
 
-    // Find user by ID (used by ME))
-    async findByIdMe(id: number): Promise<User | null> {
+    async update(id: number, updateData: Partial<{ email: string; firstName: string; lastName: string; role: 'student' | 'instructor' | 'admin' }>) {
         const db = this.databaseProvider.getDb();
-        const [userInfo] = await db
-            .select()
-            .from(users)
-            .where(eq(users.id, id));
-        return userInfo ?? null;
-    }
-
-    // Find all users
-    async findAll(): Promise<User[]> {
-        const db = this.databaseProvider.getDb();
-        const allUsers = await db.select().from(users);
-        
-        // Remove password hashes from all users
-        return allUsers.map(user => {
-            const { passwordHash, ...userWithoutPassword } = user;
-            return userWithoutPassword as User;
-        });
-    }
-
-    // Create a user
-    async create(userData: Partial<User>): Promise<User> {
-        const db = this.databaseProvider.getDb();
-
-        // Hash the password before storing
-        const hashedPassword = await bcrypt.hash(userData.password || '', 10);
-
-        const [newUser] = await db
-            .insert(users)
-            .values({
-                email: userData.email!,
-                passwordHash: hashedPassword,
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                role: userData.role || 'student',
-            })
-            .returning();
-
-        return newUser;
-    }
-
-    // Update a user
-    async update(id: number, updateData: Partial<User>): Promise<User> {
-        const db = this.databaseProvider.getDb();
-
-        // Check if user exists
-        await this.findById(id);
-
-        // Prepare update data
-        const dataToUpdate: any = {
-            updatedAt: new Date(),
-        };
-
-        if (updateData.email) dataToUpdate.email = updateData.email;
-        if (updateData.firstName) dataToUpdate.firstName = updateData.firstName;
-        if (updateData.lastName) dataToUpdate.lastName = updateData.lastName;
-        if (updateData.role) dataToUpdate.role = updateData.role;
-        
-        // Hash password if provided
-        if (updateData.password) {
-            dataToUpdate.passwordHash = await bcrypt.hash(updateData.password, 10);
-        }
-
-        const [updatedUser] = await db
+        const [updated] = await db
             .update(users)
-            .set(dataToUpdate)
+            .set({ ...updateData, updatedAt: new Date() })
             .where(eq(users.id, id))
             .returning();
-
-        const { passwordHash, ...userWithoutPassword } = updatedUser;
-        return userWithoutPassword as User;
+        return updated;
     }
 
-    // Delete a user
-    async remove(id: number): Promise<void> {
+    async updateMe(id: number, data: { firstName?: string; lastName?: string; bio?: string }) {
         const db = this.databaseProvider.getDb();
+        const [updated] = await db
+            .update(users)
+            .set({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                updatedAt: new Date(),
+            })
+            .where(eq(users.id, id))
+            .returning();
+        return updated;
+    }
 
-        // Check if user exists
-        await this.findById(id);
-
+    async remove(id: number) {
+        const db = this.databaseProvider.getDb();
         await db.delete(users).where(eq(users.id, id));
     }
 }
